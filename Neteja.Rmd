@@ -158,6 +158,8 @@ hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("ndividual",hotels$Catego
 hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("uite",hotels$Categoria),"ReCategoria"]<-"Suite"
 hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("riple",hotels$Categoria),"ReCategoria"]<-"Habitacio Triple"
 hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("druple",hotels$Categoria),"ReCategoria"]<-"Habitacio quadruple"
+
+hotels.Habitacio<-hotels[hotels$agrupacio_categoria=="Habitacio",]
 hotels.Habitacio$ReCategoria<-as.factor(hotels.Habitacio$ReCategoria)
 
 agrupacio_categoria_habitacion<-unique(hotels.Habitacio$ReCategoria)
