@@ -1,6 +1,6 @@
 ---
 title: 'PRACTICA 2: LIMPIEZA Y VALIDACIÓN DE LOS DATOS'
-author: "Carles Maggí Gómez"
+author: "Carles Maggi Gómez"
 tuthor: "Joan A. Maggi Gómez"
 date: '`r format(Sys.Date(),"%e de %B %Y")`'
 output:
@@ -26,22 +26,13 @@ if (!require("rmarkdown")){
 if (!require("lubridate")){
   install.packages("lubridate")
 }
-if (!require("VIM")){
-  install.packages("VIM")
-}
-if (!require("stringr")){
-  install.packages("stringr")
-}
 
-if (!require("psych")){
-  install.packages("psych")
-}
-if (!require("pROC")){
-  install.packages("pROC")
-}
 if (!require("dplyr")){
   install.packages("dplyr")
 }
+library(rmarkdown)
+library(lubridate)
+library(dplyr)
 
 ```
 Partim de tres fitxers que cal unificar en un sol per poder ser tratat
@@ -50,28 +41,47 @@ Partim de tres fitxers que cal unificar en un sol per poder ser tratat
 
 # Lectura del fitxer - read.csv() 
 
-categories <-read.csv("C:/Users/joanm/OneDrive/UOC/Tipologia i Cicle de dades/Practica2/CSV/CategoriesXComentariBooking.csv",header=F,sep=",",encoding = "UTF-8" ,stringsAsFactors = FALSE)
-comentaris <-read.csv("C:/Users/joanm/OneDrive/UOC/Tipologia i Cicle de dades/Practica2/CSV/ComentarisXHotelsBarcelonaBooking.csv",header=F,sep=",",encoding = "UTF-8" ,stringsAsFactors = FALSE)
-estancies<-read.csv("C:/Users/joanm/OneDrive/UOC/Tipologia i Cicle de dades/Practica2/CSV/HotelsBarcelonaBooking.csv",header=F,sep=",",encoding = "UTF-8" ,stringsAsFactors = FALSE)
+categories <-read.csv("https://raw.githubusercontent.com/joanmaggigo/practica2/master/CSV/CategoriesXComentariBooking.csv",header=F,sep=",",encoding = "UTF-8" ,stringsAsFactors = FALSE)
+comentaris <-read.csv("https://raw.githubusercontent.com/joanmaggigo/practica2/master/CSV/ComentarisXHotelsBarcelonaBooking.csv",header=F,sep=",",encoding = "UTF-8" ,stringsAsFactors = FALSE)
+estancies<-read.csv("https://raw.githubusercontent.com/joanmaggigo/practica2/master/CSV/HotelsBarcelonaBooking.csv",header=F,sep=",",encoding = "UTF-8" ,stringsAsFactors = FALSE)
 
 
 colnames(estancies)<-c("idHotel","estrelles","nota","nom","link")
-colnames(comentaris)<-c("idHotel","idIteracio", "index","nomHotel","nota","comPositiu","comNegatiu","data")
-colanmes(categories)<-c("idHotel")
+colnames(comentaris)<-c("idHotel","idIteracio","index","nomHotel","nota","comPositiu","comNegatiu","data")
+colnames(categories)<-c("idHotel","idIteracio","index","Categoria")
 head(estancies)
+
+# Creem un única dataset que fusiona tots els comentaries i categories
+comentaris.cat<-merge(comentaris,categories,by.x=c("idHotel","idIteracio","index"),by.y=c("idHotel","idIteracio","index"))
+# Fem el merge amb hotels
+hotels.comentaris.cat<-merge(comentaris.cat,estancies, by.x="idHotel", by.y="idHotel")
 
 ```
 
 ****
-# Descripcó del dataset.
+# Descripcó dels dataset.
 ****
 Podem trobar el dataset e el següent repositori :
 
-https://github.com/cmaggiuoc/mocatriz/tree/master/CSV
+https://github.com/joanmaggigo/practica2/CSV
+
+
+El dataset d'hotels  conté `r nrow(estancies)` registres i  `r ncol(estancies)` variables. 
+El dataset de comentaris conte `r nrow(comentaris)` registres i  `r ncol(comentaris)` variables. 
+El dataset de categories per comentaries conte `r nrow(categories)` registres i  `r ncol(categories)` variables. 
+
+
+
+
 
 Primer de tot ,ens quedarem només amb els hotels, no tenint en compte els apartaments ( Estrelles = 0)
 ```{r, echo=TRUE}
-hotels<-estancies[]
+hotels<-hotels.comentaris.cat[which(hotels.comentaris.cat$estrelles!=0),]
+#Anem a valorar quantes categories hi ha per comentaris, per veure si podem convertir en n variables descrivint un aspecte de l'hotel, com ara numero de nits, tipus d'estancia, etc.. primer mirem com es distribueixen per numero de categories
+categoria_per_comentari <- hotels %>% group_by(idHotel,idIteracio,index) %>% summarize(total_cat=n())
+comentaris_per_num_categories<-categoria_per_comentari %>% group_by(total_cat) %>% summarize(total_comentaris=n())
+kable(comentaris_per_num_categories)
+
 
 
 ```
@@ -83,8 +93,114 @@ hotels<-estancies[]
 ****
 
 
+Estudiant la distribució per categories pensem que podem agrupar en 5 grups les diferents categories de comentari, i per tant, no tindriem en compte, tant per volum, com per numero de categories aquells comentaris que tenen 6 categories.
 
-El fichero de datos contiene `r nrow(t_nba)` registros y  `r ncol(t_nba)` variables. 
+
+```{r, echo=TRUE}
+#La agrupació de categoria la inicialitzo amb la agrupació alltres/darrer
+hotels$agrupacio_categoria<-"Acompanyament"
+
+kable(hotels %>% group_by(Categoria) %>% summarize(total_cat=n()))
+
+hotels[grep("stancia",hotels$Categoria),"agrupacio_categoria"]<-"Nits"
+hotels[grep("Enviadopormóvil",hotels$Categoria),"agrupacio_categoria"]<-"ProcedenciaComentari"
+hotels[grep("abitaci",hotels$Categoria),"agrupacio_categoria"]<-"Habitacio"
+hotels[grep("uite",hotels$Categoria),"agrupacio_categoria"]<-"Habitacio"
+hotels[grep("DobleEstándar",hotels$Categoria),"agrupacio_categoria"]<-"Habitacio"
+hotels[grep("Apartamento",hotels$Categoria),"agrupacio_categoria"]<-"Habitacio"
+hotels[grep("Viaje",hotels$Categoria),"agrupacio_categoria"]<-"TipusViatge"
+hotels[grep("Viaje",hotels$Categoria),"agrupacio_categoria"]<-"TipusViatge"
+hotels[grep("mascota",hotels$Categoria),"agrupacio_categoria"]<-"ViajaConMascota"
+
+
+agrupacio_categoria<-unique(hotels$agrupacio_categoria)
+for (cols in agrupacio_categoria) 
+{
+print(hotels[which(hotels$agrupacio_categoria==cols),] %>% group_by(Categoria) %>% summarize(total_cat=n()))
+}
+
+#Recategoritzem dues agrupacions de categories, en funció dels valors observats. Seran l'agrupació Habitació, y la agrupació Nits
+
+hotels$ReCategoria<-hotels$Categoria
+
+#A les estancies de mes de 7 dies diem que la nova categoria es mésde7dies
+hotels[which(hotels$agrupacio_categoria=="Nits" & as.numeric(gsub("\\D", "",hotels$Categoria))>7) ,"ReCategoria"]<-"Mesde7"
+
+hotels[which(hotels$agrupacio_categoria=="Habitacio"),"ReCategoria"]<-"Altres"
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("oble",hotels$Categoria),"ReCategoria"]<-"Habitacio Doble"
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("ndividual",hotels$Categoria),"ReCategoria"]<-"Habitacio Individual"
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("uite",hotels$Categoria),"ReCategoria"]<-"Suite"
+
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("riple",hotels$Categoria),"ReCategoria"]<-"Habitacio Triple"
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("druple",hotels$Categoria),"ReCategoria"]<-"Habitacio quadruple"
+
+
+hotels.Habitacio<-hotels[which(hotels$agrupacio_categoria=="Habitacio"),]
+hotels.Habitacio$ReCategoria<-as.factor(hotels.Habitacio$ReCategoria)
+
+agrupacio_categoria_habitacion<-unique(hotels.Habitacio$ReCategoria)
+for (cols in agrupacio_categoria_habitacion) 
+{
+  print(cols)
+print(hotels.Habitacio[which(hotels.Habitacio$ReCategoria==cols),] %>% group_by(Categoria) %>% summarize(total_cat=n()))
+}
+
+
+#Anem a crear el Dataset de treball
+
+#Creem un identificador de persona
+hotels$idPersona <- paste(as.character(hotels$idHotel), as.character(hotels$idIteracio), as.character(hotels$index),sep="_")
+
+categories_per_persona<-hotels %>% group_by(idPersona) %>% summarize(total_cat=n())
+nrow(categories_per_persona)
+
+
+
+#Creem el dataset de treball
+data<-unique(hotels[c("nomHotel","nota.x","data","estrelles","idPersona","nota.y")])
+nrow(data)
+data<-merge(data,categories_per_persona,by.x="idPersona",by.y="idPersona",all.y = T)
+nrow(data)
+
+data.Habitacio<-hotels[hotels$agrupacio_categoria=="Habitacio",]
+data.Habitacio<-data.Habitacio[c("idPersona","ReCategoria")]
+data.Nits<-hotels[hotels$agrupacio_categoria=="Nits",]
+data.Nits<-data.Nits[c("idPersona","ReCategoria")]
+
+data.ProcedenciaComentari<-hotels[hotels$agrupacio_categoria=="ProcedenciaComentari",]
+data.ProcedenciaComentari<-data.ProcedenciaComentari[c("idPersona","ReCategoria")]
+
+data.TipusViatge<-hotels[hotels$agrupacio_categoria=="TipusViatge",]
+data.TipusViatge<-data.TipusViatge[c("idPersona","ReCategoria")]
+
+data.Acompanyament<-hotels[hotels$agrupacio_categoria=="Acompanyament",]
+data.Acompanyament<-data.Acompanyament[c("idPersona","ReCategoria")]
+
+data.ViajaConMascota<-hotels[hotels$agrupacio_categoria=="ViajaConMascota",]
+data.ViajaConMascota<-data.ViajaConMascota[c("idPersona","ReCategoria")]
+
+
+data<-merge(data,data.Habitacio,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.Nits,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.ProcedenciaComentari,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.TipusViatge,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.Acompanyament,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.ViajaConMascota,by.x="idPersona",by.y="idPersona",all.x = T)
+
+#Veiem un problema amb l'agrupació d'acompanyament perquè ens puja el nombre de persones, pel que podem deduir
+#que tenum una mateixa persona amb dues categories de la mateixa agruapcio acompanyement, veiem quines
+
+
+
+colnames(data)<-c("idPersona","nomHotel","notaHotel","data","estrelles","notaPersona","num_cat","TipusHabitacio","Nits","ProcedenciaComentari","TipusViatge","Acompanyament","ViajaConMascota")
+
+idPersona.r<-data %>% group_by(idPersona) %>% summarise(total=n()) %>% filter(total>1)
+data[(data$idPerson %in% idPersona.r$idPersona),]
+```
+
+
+
+El dataset final  conté `r nrow(data)` registros y  `r ncol(data)` variables. 
 
 Contiene `r length(which(t_nba$sex==0))` jugadores y  `r length(which(t_nba$sex==1))` jugadoras.
 
