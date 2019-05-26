@@ -33,11 +33,15 @@ if (!require("dplyr")){
 if (!require("pROC")){
   install.packages("pROC")
 }
+if (!require("SDMTools")){
+  install.packages("SDMTools")
+}
 
 library(rmarkdown)
 library(lubridate)
 library(dplyr)
 library(pROC)
+library(SDMTools)
 
 ```
 Partim de tres fitxers que cal unificar en un sol per poder ser tratat
@@ -390,7 +394,7 @@ auc(data.regressio$recomanar, pred)
 
 
 
-#Anem a fer anova hotel per hotel i creant el resultat en forma de taula
+#Anem a ferun regressió logistica per hotel i creant el resultat en forma de taula
 llista_hotels=unique(data.hotels_comparables$nomHotel)
 result_roc<-NULL
 for (cols in llista_hotels)
@@ -399,24 +403,25 @@ for (cols in llista_hotels)
   data.regressio<-data[data$nomHotel==cols,]
   data.regressio$recomanar<-ifelse(data.regressio$notaHotel<data.regressio$notapersona,0,1)
   
-  try(model.recomanancio<-glm(recomanar~TipusHabitacio +Nits+  ProcedenciaComentari + 
+  try(model.recomanacio<-glm(recomanar~TipusHabitacio +Nits+  ProcedenciaComentari + 
   TipusViatge  + Acompanyament+ Season , data = data.regressio),silent=T)
-  pred<-predict(model.recomanancio,data.regressio,type="response")
+  pred<-predict(model.recomanacio,data.regressio,type="response")
   area<-auc(data.regressio$recomanar, pred)
   optim_point<-optim.thresh(data.regressio$recomanar,pred)$min.ROC.plot.distance
+  list.model.recomanacio<-model.recomanacio
   
   if (is.null(result_roc))
   {
-    result_roc<-cbind(cols,area,optim_point)
+    result_roc<-cbind(cols,area,optim_point,model.recomanacio)
+  
   }
   else
   {
-    aux.merge<-cbind(cols,area,optim_point)
+    aux.merge<-cbind(cols,area,optim_point,model.recomanacio)
     result_roc<-rbind(result_roc,aux.merge)
     
   }
-  
-  llista_roc<-list(llista_roc,result_roc,model.recomanancio)
+
 
 }
 
