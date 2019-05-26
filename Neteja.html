@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Carles Maggi Gómez" />
+<meta name="author" content="Carles Maggi Gómez - Joan A. Maggi Gómez" />
 
 
 <title>PRACTICA 2: LIMPIEZA Y VALIDACIÓN DE LOS DATOS</title>
@@ -70,7 +70,9 @@ h6 {
 </style>
 
 
+</head>
 
+<body>
 
 <style type="text/css">
 .main-container {
@@ -101,6 +103,8 @@ summary {
 </style>
 
 
+
+<div class="container-fluid main-container">
 
 <!-- tabsets -->
 
@@ -175,23 +179,14 @@ $(document).ready(function () {
 
 
 
-</head>
-
-<body>
-
-
-<div class="container-fluid main-container">
-
-
-
 
 <div class="fluid-row" id="header">
 
 
 
 <h1 class="title toc-ignore">PRACTICA 2: LIMPIEZA Y VALIDACIÓN DE LOS DATOS</h1>
-<h4 class="author">Carles Maggi Gómez</h4>
-<h4 class="date">25 de mayo 2019</h4>
+<h4 class="author"><em>Carles Maggi Gómez - Joan A. Maggi Gómez</em></h4>
+<h4 class="date"><em>26 de mayo 2019</em></h4>
 
 </div>
 
@@ -199,6 +194,7 @@ $(document).ready(function () {
 <ul>
 <li><a href="#descripco-dels-dataset."><span class="toc-section-number">1</span> Descripcó dels dataset.</a></li>
 <li><a href="#limpieza-de-datos"><span class="toc-section-number">2</span> Limpieza de datos</a></li>
+<li><a href="#neteja-de-dades"><span class="toc-section-number">3</span> Neteja de dades</a></li>
 </ul>
 </div>
 
@@ -706,7 +702,1140 @@ data&lt;-merge(data,data.Acompanyament,by.x=&quot;idPersona&quot;,by.y=&quot;idP
 data&lt;-merge(data,data.ViajaConMascota,by.x=&quot;idPersona&quot;,by.y=&quot;idPersona&quot;,all.x = T)
 
 
-colnames(data)&lt;-c(&quot;idPersona&quot;,&quot;nomHotel&quot;,&quot;notaHotel&quot;,&quot;data&quot;,&quot;estrelles&quot;,&quot;notaPersona&quot;,&quot;num_cat&quot;,&quot;TipusHabitacio&quot;,&quot;Nits&quot;,&quot;ProcedenciaComentari&quot;,&quot;TipusViatge&quot;,&quot;Acompanyament&quot;,&quot;ViajaConMascota&quot;)</code></pre>
+colnames(data)&lt;-c(&quot;idPersona&quot;,&quot;nomHotel&quot;,&quot;notapersona&quot;,&quot;data&quot;,&quot;estrelles&quot;,&quot;notaHotel&quot;,&quot;num_cat&quot;,&quot;TipusHabitacio&quot;,&quot;Nits&quot;,&quot;ProcedenciaComentari&quot;,&quot;TipusViatge&quot;,&quot;Acompanyament&quot;,&quot;ViajaConMascota&quot;)</code></pre>
+<hr />
+</div>
+<div id="neteja-de-dades" class="section level1">
+<h1><span class="header-section-number">3</span> Neteja de dades</h1>
+<hr />
+<p>Mirarem els valors 0 de les notes mitjana d’hotel i les notes de les persons. Recordem que el valor 0 en les estrelles hem entés que significava que era un apartament i per tant no entra en el nostre estudi, ara mirem les notes mitja dels hotels i la nota de les persones</p>
+<pre class="r"><code>#Comencem analitzant des de la perspectiva de l'hotel.
+aux.hotels&lt;-unique(data[c(&quot;nomHotel&quot;,&quot;notaHotel&quot;,&quot;estrelles&quot;)])
+summary(aux.hotels)</code></pre>
+<pre><code>##    nomHotel          notaHotel           estrelles   
+##  Length:83          Length:83          Min.   :1.00  
+##  Class :character   Class :character   1st Qu.:3.00  
+##  Mode  :character   Mode  :character   Median :4.00  
+##                                        Mean   :3.41  
+##                                        3rd Qu.:4.00  
+##                                        Max.   :5.00</code></pre>
+<pre class="r"><code>#pel que fa a les estrelles veiem que té una distribució raonable amb valors, etc.. per tant ho donem per bo
+#la nota está com a caràcter, anem a posar-la com a númeric
+data$notaHotel&lt;-as.numeric(gsub(&quot;,&quot;,&quot;.&quot;,data$notaHotel))
+aux.hotels$notaHotel&lt;-as.numeric(gsub(&quot;,&quot;,&quot;.&quot;,aux.hotels$notaHotel))
+summary(aux.hotels)</code></pre>
+<pre><code>##    nomHotel           notaHotel       estrelles   
+##  Length:83          Min.   :7.900   Min.   :1.00  
+##  Class :character   1st Qu.:8.300   1st Qu.:3.00  
+##  Mode  :character   Median :8.600   Median :4.00  
+##                     Mean   :8.618   Mean   :3.41  
+##                     3rd Qu.:8.800   3rd Qu.:4.00  
+##                     Max.   :9.400   Max.   :5.00</code></pre>
+<pre class="r"><code>#Les notes semblen raobales, i no sembla que hi hagi valors extrems ni zeros, ho visualitzem amb el boxplot
+boxplot(aux.hotels$notaHotel)</code></pre>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAAt1BMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrY6AAA6OgA6Ojo6OmY6ZmY6ZpA6ZrY6kNtmAABmOgBmOjpmZjpmZmZmZpBmkJBmkLZmkNtmtttmtv+QOgCQZgCQZjqQZmaQkLaQtraQttuQ2/+2ZgC2Zjq2kGa2kLa2tpC2tra2ttu229u22/+2///bkDrbkGbbtmbbtpDbtrbb25Db27bb29vb2//b////tmb/25D/27b/29v//7b//9v///9MyqVGAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAZW0lEQVR4nO3d7XacxZWG4VYCGGdMcKKJExgYgmEQEBIcOwiDdP7HNd2SbTku7LXfx1XpKnFdfyBe416svXff0/poaXcJQGR37P8AgFUJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCcwd0B9BN/0R1f8SOjj1t4Hbp3qjeD9jTgP+HAfxqCShASEABQgIKEBJQgJCAAoQEFCAk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CShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEPp/PminvF6jgs4AAAAASUVORK5CYII=" width="672" /></p>
+<pre class="r"><code>#Analitzem les continues des de la perspectiva del comentari.
+summary(data)</code></pre>
+<pre><code>##   idPersona           nomHotel         notapersona       
+##  Length:16284       Length:16284       Length:16284      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+##                                                          
+##      data             estrelles      notaHotel        num_cat     
+##  Length:16284       Min.   :1.00   Min.   :7.900   Min.   :2.000  
+##  Class :character   1st Qu.:2.00   1st Qu.:8.300   1st Qu.:4.000  
+##  Mode  :character   Median :3.00   Median :8.500   Median :5.000  
+##                     Mean   :3.11   Mean   :8.535   Mean   :4.609  
+##                     3rd Qu.:4.00   3rd Qu.:8.700   3rd Qu.:5.000  
+##                     Max.   :5.00   Max.   :9.400   Max.   :6.000  
+##  TipusHabitacio         Nits           ProcedenciaComentari
+##  Length:16284       Length:16284       Length:16284        
+##  Class :character   Class :character   Class :character    
+##  Mode  :character   Mode  :character   Mode  :character    
+##                                                            
+##                                                            
+##                                                            
+##  TipusViatge        Acompanyament      ViajaConMascota   
+##  Length:16284       Length:16284       Length:16284      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+## </code></pre>
+<pre class="r"><code>#veiem que s'ha de passar les notes a numeric
+data$notapersona&lt;-as.numeric(gsub(&quot;,&quot;,&quot;.&quot;,data$notapersona))
+#hem de posar la data en format data
+data$data&lt;-as.Date(data$data)
+#Hem arrenjat la nota i la data
+summary(data)</code></pre>
+<pre><code>##   idPersona           nomHotel          notapersona    
+##  Length:16284       Length:16284       Min.   : 2.500  
+##  Class :character   Class :character   1st Qu.: 7.500  
+##  Mode  :character   Mode  :character   Median : 8.800  
+##                                        Mean   : 8.558  
+##                                        3rd Qu.:10.000  
+##                                        Max.   :10.000  
+##       data              estrelles      notaHotel        num_cat     
+##  Min.   :2017-04-13   Min.   :1.00   Min.   :7.900   Min.   :2.000  
+##  1st Qu.:2017-11-25   1st Qu.:2.00   1st Qu.:8.300   1st Qu.:4.000  
+##  Median :2018-05-13   Median :3.00   Median :8.500   Median :5.000  
+##  Mean   :2018-05-06   Mean   :3.11   Mean   :8.535   Mean   :4.609  
+##  3rd Qu.:2018-11-04   3rd Qu.:4.00   3rd Qu.:8.700   3rd Qu.:5.000  
+##  Max.   :2019-04-13   Max.   :5.00   Max.   :9.400   Max.   :6.000  
+##  TipusHabitacio         Nits           ProcedenciaComentari
+##  Length:16284       Length:16284       Length:16284        
+##  Class :character   Class :character   Class :character    
+##  Mode  :character   Mode  :character   Mode  :character    
+##                                                            
+##                                                            
+##                                                            
+##  TipusViatge        Acompanyament      ViajaConMascota   
+##  Length:16284       Length:16284       Length:16284      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+## </code></pre>
+<pre class="r"><code>#veiem els NA
+colSums(is.na(data))</code></pre>
+<pre><code>##            idPersona             nomHotel          notapersona 
+##                    0                    0                    0 
+##                 data            estrelles            notaHotel 
+##                    0                    0                    0 
+##              num_cat       TipusHabitacio                 Nits 
+##                    0                    8                    8 
+## ProcedenciaComentari          TipusViatge        Acompanyament 
+##                 4746                 1640                    0 
+##      ViajaConMascota 
+##                16253</code></pre>
+<pre class="r"><code>#Anem a pams, pel cas, ViajaConMascota, sabem que si no está informat, es raonable pensar que no viatge ambMascota. Fem una recategorització per transformar-ho en una binaria, els que tenen valors S els que no en tenen N
+
+data[!(is.na(data$ViajaConMascota)),&quot;ViajaConMascota&quot;]&lt;-&quot;S&quot;
+data[(is.na(data$ViajaConMascota)),&quot;ViajaConMascota&quot;]&lt;-&quot;N&quot;
+
+#Per tipus de viatge, el volum de NA es un 10% aprox, per tant pensem que té prou instancia per si sol com per afegir un valor més dins la categoria que sigui SENSEINFORMAR per veure impactes en la nota (o altres)
+
+data[(is.na(data$TipusViatge)),&quot;TipusViatge&quot;]&lt;-&quot;SenseInformar&quot;
+
+#Procedencia comentari, només té un valor informat, per tant, entenem que l'altre valor és per web
+data[(is.na(data$ProcedenciaComentari)),&quot;ProcedenciaComentari&quot;]&lt;-&quot;EnviadoporWeb&quot;
+
+#A tipusHabitacio I Nits, tenim la sospita que els que estan en NA son els mateixos.
+data[(is.na(data$Nits)) |is.na(data$TipusHabitacio),]</code></pre>
+<pre><code>##          idPersona                   nomHotel notapersona       data
+## 23     1017019_1_3            Hostal Balkonis         3.8 2019-03-07
+## 1645   173142_3_40              Hotel El Call         9.6 2018-01-02
+## 3215  2311290_4_22     Golden Tulip Barcelona        10.0 2017-07-30
+## 7849    90480_2_15     Melia Barcelona Sarriá         8.8 2018-08-08
+## 7878    90480_2_41     Melia Barcelona Sarriá         2.5 2018-04-17
+## 10336   91120_2_24 Hesperia Barcelona Del Mar         9.6 2018-08-29
+## 10892   91493_1_46 Tryp Barcelona Apolo Hotel         3.3 2019-02-22
+## 14135   93879_1_14  Pullman Barcelona Skipper        10.0 2019-02-13
+##       estrelles notaHotel num_cat TipusHabitacio Nits ProcedenciaComentari
+## 23            2       8.8       2           &lt;NA&gt; &lt;NA&gt;        EnviadoporWeb
+## 1645          1       8.3       3           &lt;NA&gt; &lt;NA&gt;      Enviadopormóvil
+## 3215          4       8.7       2           &lt;NA&gt; &lt;NA&gt;        EnviadoporWeb
+## 7849          5       8.2       3           &lt;NA&gt; &lt;NA&gt;      Enviadopormóvil
+## 7878          5       8.2       3           &lt;NA&gt; &lt;NA&gt;      Enviadopormóvil
+## 10336         4       8.2       2           &lt;NA&gt; &lt;NA&gt;        EnviadoporWeb
+## 10892         4       8.6       3           &lt;NA&gt; &lt;NA&gt;      Enviadopormóvil
+## 14135         5       8.5       2           &lt;NA&gt; &lt;NA&gt;        EnviadoporWeb
+##           TipusViatge           Acompanyament ViajaConMascota
+## 23        Viajedeocio                  Pareja               N
+## 1645      Viajedeocio                  Pareja               N
+## 3215      Viajedeocio Familiaconniñospequeños               N
+## 7849      Viajedeocio Familiaconniñospequeños               N
+## 7878  Viajedenegocios     Personaqueviajasola               N
+## 10336     Viajedeocio                   Grupo               N
+## 10892 Viajedenegocios     Personaqueviajasola               N
+## 14135 Viajedenegocios     Personaqueviajasola               N</code></pre>
+<pre class="r"><code>#Veiem que si per tant, sembla raonable pensar que és un error i que milor obviar la informació (eliminarla)
+data&lt;-data[!(is.na(data$Nits)) &amp; !(is.na(data$TipusHabitacio)),]
+
+summary(data)</code></pre>
+<pre><code>##   idPersona           nomHotel          notapersona    
+##  Length:16276       Length:16276       Min.   : 2.500  
+##  Class :character   Class :character   1st Qu.: 7.500  
+##  Mode  :character   Mode  :character   Median : 8.800  
+##                                        Mean   : 8.559  
+##                                        3rd Qu.:10.000  
+##                                        Max.   :10.000  
+##       data              estrelles      notaHotel        num_cat    
+##  Min.   :2017-04-13   Min.   :1.00   Min.   :7.900   Min.   :3.00  
+##  1st Qu.:2017-11-25   1st Qu.:2.00   1st Qu.:8.300   1st Qu.:4.00  
+##  Median :2018-05-13   Median :3.00   Median :8.500   Median :5.00  
+##  Mean   :2018-05-06   Mean   :3.11   Mean   :8.535   Mean   :4.61  
+##  3rd Qu.:2018-11-04   3rd Qu.:4.00   3rd Qu.:8.700   3rd Qu.:5.00  
+##  Max.   :2019-04-13   Max.   :5.00   Max.   :9.400   Max.   :6.00  
+##  TipusHabitacio         Nits           ProcedenciaComentari
+##  Length:16276       Length:16276       Length:16276        
+##  Class :character   Class :character   Class :character    
+##  Mode  :character   Mode  :character   Mode  :character    
+##                                                            
+##                                                            
+##                                                            
+##  TipusViatge        Acompanyament      ViajaConMascota   
+##  Length:16276       Length:16276       Length:16276      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+## </code></pre>
+<pre class="r"><code>#Anem a transformar les variables categóriques as.factor
+data$ViajaConMascota&lt;-as.factor(data$ViajaConMascota)
+data$Acompanyament&lt;-as.factor(data$Acompanyament)
+data$TipusViatge&lt;-as.factor(data$TipusViatge)
+data$ProcedenciaComentari&lt;-as.factor(data$ProcedenciaComentari)
+data$Nits&lt;-as.factor(data$Nits)
+data$TipusHabitacio&lt;-as.factor(data$TipusHabitacio)
+data$estrelles&lt;-as.factor(data$estrelles)
+data$estrelles&lt;-ordered(data$estrelles,levels=c(&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot;))
+data$nomHotel&lt;-as.factor(data$nomHotel)
+summary(data)</code></pre>
+<pre><code>##   idPersona                                      nomHotel    
+##  Length:16276       Catalonia Sagrada Familia        :  920  
+##  Class :character   Hotel Lloret Ramblas             :  843  
+##  Mode  :character   Ayre Hotel Gran Vía              :  788  
+##                     Barceló Sants                    :  635  
+##                     Hotel Cortes                     :  545  
+##                     NH Collection Barcelona Constanza:  469  
+##                     (Other)                          :12076  
+##   notapersona          data            estrelles   notaHotel    
+##  Min.   : 2.500   Min.   :2017-04-13   1:1381    Min.   :7.900  
+##  1st Qu.: 7.500   1st Qu.:2017-11-25   2:3104    1st Qu.:8.300  
+##  Median : 8.800   Median :2018-05-13   3:4464    Median :8.500  
+##  Mean   : 8.559   Mean   :2018-05-06   4:6995    Mean   :8.535  
+##  3rd Qu.:10.000   3rd Qu.:2018-11-04   5: 332    3rd Qu.:8.700  
+##  Max.   :10.000   Max.   :2019-04-13             Max.   :9.400  
+##                                                                 
+##     num_cat                  TipusHabitacio                 Nits     
+##  Min.   :3.00   Altres              : 1180   Estanciade1noche :6155  
+##  1st Qu.:4.00   Habitacio Doble     :12664   Estanciade2noches:4203  
+##  Median :5.00   Habitacio Individual: 1428   Estanciade3noches:3073  
+##  Mean   :4.61   Habitacio quadruple :  202   Estanciade4noches:1669  
+##  3rd Qu.:5.00   Habitacio Triple    :  684   Estanciade5noches: 643  
+##  Max.   :6.00   Suite               :  118   Estanciade6noches: 289  
+##                                              (Other)          : 244  
+##       ProcedenciaComentari          TipusViatge   
+##  Enviadopormóvil:11534     SenseInformar  : 1640  
+##  EnviadoporWeb  : 4742     Viajedenegocios: 2095  
+##                            Viajedeocio    :12541  
+##                                                   
+##                                                   
+##                                                   
+##                                                   
+##                  Acompanyament  ViajaConMascota
+##  Familiaconniñosmayores :   2   N:16245        
+##  Familiaconniñospequeños:2990   S:   31        
+##  Grupo                  :1731                  
+##  Grupodeamigos          : 422                  
+##  Pareja                 :7873                  
+##  Personaqueviajasola    :3258                  
+## </code></pre>
+<pre class="r"><code>#Enadonem que acompanyament te un factor que es Familia con niños mayores y Familia con ninos pequeños, i el grup de Familia con ninños mayores es força petit, pel que agrupem els dos nivells a Familiaconniños
+levels(data$Acompanyament) &lt;- c(&quot;Familiaconniños&quot;,&quot;Familiaconniños&quot;,&quot;Grupo&quot;,&quot;Grupodeamigos&quot;,&quot;Pareja&quot;,&quot;Personaqueviajasola&quot;)</code></pre>
+<p>Ens decidim ara a fer les primeres hipotesis, i la primera es que volem saber si les notes que es donen en el primer trimestre de l’any son diferents a les que es donen a l’estiu</p>
+<p>PEr això, caldrà, que afegim una variable nova, que determini l’epoca de l’any en funció de la data del comentari (pot haver-hi un decalatge de dies, però assumin que els comentaris es fan aprop de la data en la que s’ha gaudit l’estancia de l’hotel)</p>
+<pre class="r"><code>data$Season&lt;-&quot;PRIMER TRIMESTRE&quot;
+data[month(data$data)&gt;=4 &amp; month(data$data)&lt;=6,&quot;Season&quot; ]&lt;-&quot;SEGON TRIMESTRE&quot;
+data[month(data$data)&gt;=7 &amp; month(data$data)&lt;=9,&quot;Season&quot; ]&lt;-&quot;TERCER TRIMESTRE&quot;
+data[month(data$data)&gt;=10 &amp; month(data$data)&lt;=12,&quot;Season&quot; ]&lt;-&quot;QUART TRIMESTRE&quot;
+data$Season&lt;-as.factor(data$Season)
+summary(data)</code></pre>
+<pre><code>##   idPersona                                      nomHotel    
+##  Length:16276       Catalonia Sagrada Familia        :  920  
+##  Class :character   Hotel Lloret Ramblas             :  843  
+##  Mode  :character   Ayre Hotel Gran Vía              :  788  
+##                     Barceló Sants                    :  635  
+##                     Hotel Cortes                     :  545  
+##                     NH Collection Barcelona Constanza:  469  
+##                     (Other)                          :12076  
+##   notapersona          data            estrelles   notaHotel    
+##  Min.   : 2.500   Min.   :2017-04-13   1:1381    Min.   :7.900  
+##  1st Qu.: 7.500   1st Qu.:2017-11-25   2:3104    1st Qu.:8.300  
+##  Median : 8.800   Median :2018-05-13   3:4464    Median :8.500  
+##  Mean   : 8.559   Mean   :2018-05-06   4:6995    Mean   :8.535  
+##  3rd Qu.:10.000   3rd Qu.:2018-11-04   5: 332    3rd Qu.:8.700  
+##  Max.   :10.000   Max.   :2019-04-13             Max.   :9.400  
+##                                                                 
+##     num_cat                  TipusHabitacio                 Nits     
+##  Min.   :3.00   Altres              : 1180   Estanciade1noche :6155  
+##  1st Qu.:4.00   Habitacio Doble     :12664   Estanciade2noches:4203  
+##  Median :5.00   Habitacio Individual: 1428   Estanciade3noches:3073  
+##  Mean   :4.61   Habitacio quadruple :  202   Estanciade4noches:1669  
+##  3rd Qu.:5.00   Habitacio Triple    :  684   Estanciade5noches: 643  
+##  Max.   :6.00   Suite               :  118   Estanciade6noches: 289  
+##                                              (Other)          : 244  
+##       ProcedenciaComentari          TipusViatge   
+##  Enviadopormóvil:11534     SenseInformar  : 1640  
+##  EnviadoporWeb  : 4742     Viajedenegocios: 2095  
+##                            Viajedeocio    :12541  
+##                                                   
+##                                                   
+##                                                   
+##                                                   
+##              Acompanyament  ViajaConMascota              Season    
+##  Familiaconniños    :2992   N:16245         PRIMER TRIMESTRE:4471  
+##  Grupo              :1731   S:   31         QUART TRIMESTRE :4126  
+##  Grupodeamigos      : 422                   SEGON TRIMESTRE :3820  
+##  Pareja             :7873                   TERCER TRIMESTRE:3859  
+##  Personaqueviajasola:3258                                          
+##                                                                    
+## </code></pre>
+<pre class="r"><code>#Anem a veure si la diferencia en general de les notes de les persones pels hotels difereix entre el primer trimestre i el tercer trimetre. Per això, apliquem un anova.
+hotels_1er_3er&lt;-data %&gt;% filter(Season=='PRIMER TRIMESTRE' | Season=='TERCER TRIMESTRE')
+aov.hotels_1er_3er=aov(notapersona~Season,hotels_1er_3er)
+summary(aov.hotels_1er_3er)</code></pre>
+<pre><code>##               Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## Season         1    141  140.63   63.51 1.81e-15 ***
+## Residuals   8328  18443    2.21                     
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+<pre class="r"><code>kable(hotels_1er_3er%&gt;% group_by(Season) %&gt;% summarise(n=n(),mean=mean(notapersona),sd=sd(notapersona)))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Season</th>
+<th align="right">n</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">4471</td>
+<td align="right">8.686357</td>
+<td align="right">1.432250</td>
+</tr>
+<tr class="even">
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">3859</td>
+<td align="right">8.425784</td>
+<td align="right">1.550353</td>
+</tr>
+</tbody>
+</table>
+<p>Existeix una fortta evidència de diferencia de les mitjanes de les notes entre el primer trimestre i el tercer. Sembla ser que cap a l’estiu la qualitat es percebuda pitjor que a l’hivern. Això vol dir o que els clients són més exigents o el personal té menys qualitat.</p>
+<p>Ara volem veure, d’aquells hotels que tinguin una mostra superior a 30 tant per l’estiu com per l’hivern tenen una nota significativament diferent entre els dos trimestres.</p>
+<pre class="r"><code>#busco els hotels que tinguin com a minim 30 elements tant en el primer trimestre com en el tercer.
+hotels_comparables&lt;-data %&gt;% group_by(nomHotel,Season)  %&gt;% filter(Season=='PRIMER TRIMESTRE' | Season=='TERCER TRIMESTRE') %&gt;% summarise(n=n()) %&gt;% filter(n&gt;30) %&gt;% group_by(nomHotel) %&gt;% summarise(n=n()) %&gt;% filter(n==2)
+data.hotels_comparables &lt;- data[data$nomHotel %in% hotels_comparables$nomHotel,]
+data.hotels_comparables&lt;-data.hotels_comparables %&gt;% filter(Season=='PRIMER TRIMESTRE' | Season=='TERCER TRIMESTRE')
+
+#Anem a fer anova hotel per hotel i creant el resultat en forma de taula
+llista_hotels=unique(data.hotels_comparables$nomHotel)
+result_aov&lt;-NULL
+for (cols in llista_hotels)
+{
+  hotel_actual&lt;-data.hotels_comparables[data.hotels_comparables$nomHotel==cols,]
+  aov.hotel_actual=aov(notapersona~Season,hotel_actual)
+  if (is.null(result_aov))
+  {
+    aux&lt;-hotel_actual %&gt;% group_by(nomHotel,Season) %&gt;% summarise(n=n(),mean=mean(notapersona),sd=sd(notapersona))
+    aux.1&lt;-aux[aux$Season=='PRIMER TRIMESTRE',]
+    aux.2&lt;-aux[aux$Season=='TERCER TRIMESTRE',]
+    aux.merge&lt;-merge(aux.1,aux.2,by.x=c(&quot;nomHotel&quot;),by.y=c(&quot;nomHotel&quot;))
+    result_aov&lt;-cbind(aux.merge,cols,summary(aov.hotel_actual)[[1]][[&quot;Pr(&gt;F)&quot;]][1])
+  }
+  else
+  {
+    aux&lt;-hotel_actual %&gt;% group_by(nomHotel,Season) %&gt;% summarise(n=n(),mean=mean(notapersona),sd=sd(notapersona))
+    aux.1&lt;-aux[aux$Season=='PRIMER TRIMESTRE',]
+    aux.2&lt;-aux[aux$Season=='TERCER TRIMESTRE',]
+    aux.merge&lt;-merge(aux.1,aux.2,by.x=c(&quot;nomHotel&quot;),by.y=c(&quot;nomHotel&quot;))
+    aux.merge&lt;-cbind(aux.merge,cols,summary(aov.hotel_actual)[[1]][[&quot;Pr(&gt;F)&quot;]][1])
+    result_aov&lt;-rbind(result_aov,aux.merge)
+  }
+}
+
+result_aov$diferenciaNota&lt;-FALSE
+result_aov[(result_aov$`summary(aov.hotel_actual)[[1]][[&quot;Pr(&gt;F)&quot;]][1]`&lt;0.05),&quot;diferenciaNota&quot;]&lt;-TRUE
+result_aov$diferencia&lt;-result_aov$mean.x-result_aov$mean.y
+kable(result_aov)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">nomHotel</th>
+<th align="left">Season.x</th>
+<th align="right">n.x</th>
+<th align="right">mean.x</th>
+<th align="right">sd.x</th>
+<th align="left">Season.y</th>
+<th align="right">n.y</th>
+<th align="right">mean.y</th>
+<th align="right">sd.y</th>
+<th align="left">cols</th>
+<th align="right">summary(aov.hotel_actual)[[1]][[“Pr(&gt;F)”]][1]</th>
+<th align="left">diferenciaNota</th>
+<th align="right">diferencia</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Hostal Balkonis</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">67</td>
+<td align="right">9.071642</td>
+<td align="right">0.9174745</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">31</td>
+<td align="right">8.609677</td>
+<td align="right">1.4907168</td>
+<td align="left">Hostal Balkonis</td>
+<td align="right">0.0624775</td>
+<td align="left">FALSE</td>
+<td align="right">0.4619644</td>
+</tr>
+<tr class="even">
+<td align="left">Atlantis by Atbcn</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">71</td>
+<td align="right">8.764789</td>
+<td align="right">1.2919640</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">79</td>
+<td align="right">8.749367</td>
+<td align="right">1.0414331</td>
+<td align="left">Atlantis by Atbcn</td>
+<td align="right">0.9356843</td>
+<td align="left">FALSE</td>
+<td align="right">0.0154216</td>
+</tr>
+<tr class="odd">
+<td align="left">Bcn Urban Hotels Gran Rosellon</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">75</td>
+<td align="right">8.490667</td>
+<td align="right">1.5936676</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">50</td>
+<td align="right">8.128000</td>
+<td align="right">1.5141563</td>
+<td align="left">Bcn Urban Hotels Gran Rosellon</td>
+<td align="right">0.2060140</td>
+<td align="left">FALSE</td>
+<td align="right">0.3626667</td>
+</tr>
+<tr class="even">
+<td align="left">Upper Diagonal</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">34</td>
+<td align="right">8.973529</td>
+<td align="right">1.5638548</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">42</td>
+<td align="right">8.969048</td>
+<td align="right">0.9991431</td>
+<td align="left">Upper Diagonal</td>
+<td align="right">0.9879510</td>
+<td align="left">FALSE</td>
+<td align="right">0.0044818</td>
+</tr>
+<tr class="odd">
+<td align="left">Hostal Fernando</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">118</td>
+<td align="right">8.738983</td>
+<td align="right">1.2965460</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">81</td>
+<td align="right">8.370370</td>
+<td align="right">1.2641642</td>
+<td align="left">Hostal Fernando</td>
+<td align="right">0.0479331</td>
+<td align="left">TRUE</td>
+<td align="right">0.3686127</td>
+</tr>
+<tr class="even">
+<td align="left">Grupotel Gran Via 678</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">95</td>
+<td align="right">8.835790</td>
+<td align="right">1.2127791</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">41</td>
+<td align="right">8.673171</td>
+<td align="right">1.5622139</td>
+<td align="left">Grupotel Gran Via 678</td>
+<td align="right">0.5129887</td>
+<td align="left">FALSE</td>
+<td align="right">0.1626187</td>
+</tr>
+<tr class="odd">
+<td align="left">Hostal Benidorm</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">104</td>
+<td align="right">8.964423</td>
+<td align="right">1.2026603</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">100</td>
+<td align="right">8.386000</td>
+<td align="right">1.6675161</td>
+<td align="left">Hostal Benidorm</td>
+<td align="right">0.0048288</td>
+<td align="left">TRUE</td>
+<td align="right">0.5784231</td>
+</tr>
+<tr class="even">
+<td align="left">Golden Tulip Barcelona</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">86</td>
+<td align="right">8.832558</td>
+<td align="right">1.1844524</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">64</td>
+<td align="right">8.662500</td>
+<td align="right">1.5344199</td>
+<td align="left">Golden Tulip Barcelona</td>
+<td align="right">0.4448259</td>
+<td align="left">FALSE</td>
+<td align="right">0.1700581</td>
+</tr>
+<tr class="odd">
+<td align="left">Cuatro Naciones</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">55</td>
+<td align="right">8.620000</td>
+<td align="right">1.2490589</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">109</td>
+<td align="right">8.848624</td>
+<td align="right">1.1813845</td>
+<td align="left">Cuatro Naciones</td>
+<td align="right">0.2527762</td>
+<td align="left">FALSE</td>
+<td align="right">-0.2286239</td>
+</tr>
+<tr class="even">
+<td align="left">Hotel Lloret Ramblas</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">189</td>
+<td align="right">8.211640</td>
+<td align="right">1.6529702</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">218</td>
+<td align="right">8.036238</td>
+<td align="right">1.6866291</td>
+<td align="left">Hotel Lloret Ramblas</td>
+<td align="right">0.2915620</td>
+<td align="left">FALSE</td>
+<td align="right">0.1754017</td>
+</tr>
+<tr class="odd">
+<td align="left">Hostal Q Barcelona</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">52</td>
+<td align="right">8.707692</td>
+<td align="right">1.4447805</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">100</td>
+<td align="right">8.094000</td>
+<td align="right">1.6295144</td>
+<td align="left">Hostal Q Barcelona</td>
+<td align="right">0.0235629</td>
+<td align="left">TRUE</td>
+<td align="right">0.6136923</td>
+</tr>
+<tr class="even">
+<td align="left">Room Mate Pau</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">41</td>
+<td align="right">9.195122</td>
+<td align="right">1.3483233</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">35</td>
+<td align="right">9.222857</td>
+<td align="right">1.0535893</td>
+<td align="left">Room Mate Pau</td>
+<td align="right">0.9216892</td>
+<td align="left">FALSE</td>
+<td align="right">-0.0277352</td>
+</tr>
+<tr class="odd">
+<td align="left">Catalonia Gran Via BCN</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">46</td>
+<td align="right">8.908696</td>
+<td align="right">1.2699652</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">32</td>
+<td align="right">8.134375</td>
+<td align="right">1.7215165</td>
+<td align="left">Catalonia Gran Via BCN</td>
+<td align="right">0.0249954</td>
+<td align="left">TRUE</td>
+<td align="right">0.7743207</td>
+</tr>
+<tr class="even">
+<td align="left">Hotel Ginebra</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">50</td>
+<td align="right">8.696000</td>
+<td align="right">1.4356908</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">46</td>
+<td align="right">8.608696</td>
+<td align="right">1.5481639</td>
+<td align="left">Hotel Ginebra</td>
+<td align="right">0.7749845</td>
+<td align="left">FALSE</td>
+<td align="right">0.0873043</td>
+</tr>
+<tr class="odd">
+<td align="left">Hotel Astoria</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">55</td>
+<td align="right">8.752727</td>
+<td align="right">1.1783313</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">37</td>
+<td align="right">8.648649</td>
+<td align="right">1.7194349</td>
+<td align="left">Hotel Astoria</td>
+<td align="right">0.7310648</td>
+<td align="left">FALSE</td>
+<td align="right">0.1040786</td>
+</tr>
+<tr class="even">
+<td align="left">Grupotel Gravina</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">98</td>
+<td align="right">8.921429</td>
+<td align="right">1.2136042</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">85</td>
+<td align="right">7.904706</td>
+<td align="right">1.8842648</td>
+<td align="left">Grupotel Gravina</td>
+<td align="right">0.0000189</td>
+<td align="left">TRUE</td>
+<td align="right">1.0167227</td>
+</tr>
+<tr class="odd">
+<td align="left">Acta Atrium Palace</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">53</td>
+<td align="right">8.586792</td>
+<td align="right">1.4228949</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">38</td>
+<td align="right">8.686842</td>
+<td align="right">1.4595762</td>
+<td align="left">Acta Atrium Palace</td>
+<td align="right">0.7442426</td>
+<td align="left">FALSE</td>
+<td align="right">-0.1000497</td>
+</tr>
+<tr class="even">
+<td align="left">Acta Splendid</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">51</td>
+<td align="right">8.629412</td>
+<td align="right">1.2392408</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">55</td>
+<td align="right">7.960000</td>
+<td align="right">1.9308029</td>
+<td align="left">Acta Splendid</td>
+<td align="right">0.0376259</td>
+<td align="left">TRUE</td>
+<td align="right">0.6694118</td>
+</tr>
+<tr class="odd">
+<td align="left">Catalonia La Pedrera</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">61</td>
+<td align="right">8.457377</td>
+<td align="right">1.7123531</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">58</td>
+<td align="right">8.432759</td>
+<td align="right">1.3326386</td>
+<td align="left">Catalonia La Pedrera</td>
+<td align="right">0.9306490</td>
+<td align="left">FALSE</td>
+<td align="right">0.0246184</td>
+</tr>
+<tr class="even">
+<td align="left">Catalonia Born</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">39</td>
+<td align="right">8.541026</td>
+<td align="right">1.5938563</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">45</td>
+<td align="right">9.002222</td>
+<td align="right">1.3344200</td>
+<td align="left">Catalonia Born</td>
+<td align="right">0.1526894</td>
+<td align="left">FALSE</td>
+<td align="right">-0.4611966</td>
+</tr>
+<tr class="odd">
+<td align="left">Catalonia Sagrada Familia</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">295</td>
+<td align="right">8.417966</td>
+<td align="right">1.6267479</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">190</td>
+<td align="right">8.047368</td>
+<td align="right">1.7431858</td>
+<td align="left">Catalonia Sagrada Familia</td>
+<td align="right">0.0176543</td>
+<td align="left">TRUE</td>
+<td align="right">0.3705977</td>
+</tr>
+<tr class="even">
+<td align="left">Catalunya</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">81</td>
+<td align="right">7.945679</td>
+<td align="right">1.8143904</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">80</td>
+<td align="right">7.723750</td>
+<td align="right">1.6720520</td>
+<td align="left">Catalunya</td>
+<td align="right">0.4209897</td>
+<td align="left">FALSE</td>
+<td align="right">0.2219290</td>
+</tr>
+<tr class="odd">
+<td align="left">NH Barcelona Stadium</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">87</td>
+<td align="right">8.159770</td>
+<td align="right">1.5827897</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">64</td>
+<td align="right">8.031250</td>
+<td align="right">1.5652856</td>
+<td align="left">NH Barcelona Stadium</td>
+<td align="right">0.6210621</td>
+<td align="left">FALSE</td>
+<td align="right">0.1285201</td>
+</tr>
+<tr class="even">
+<td align="left">Hotel Lleó</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">49</td>
+<td align="right">8.440816</td>
+<td align="right">1.7020721</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">39</td>
+<td align="right">8.787180</td>
+<td align="right">1.5317997</td>
+<td align="left">Hotel Lleó</td>
+<td align="right">0.3245570</td>
+<td align="left">FALSE</td>
+<td align="right">-0.3463632</td>
+</tr>
+<tr class="odd">
+<td align="left">Hesperia Barcelona Barri Gòtic</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">41</td>
+<td align="right">8.678049</td>
+<td align="right">1.4490535</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">36</td>
+<td align="right">8.002778</td>
+<td align="right">1.7208779</td>
+<td align="left">Hesperia Barcelona Barri Gòtic</td>
+<td align="right">0.0655062</td>
+<td align="left">FALSE</td>
+<td align="right">0.6752710</td>
+</tr>
+<tr class="even">
+<td align="left">Ciutat de Barcelona</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">77</td>
+<td align="right">8.772727</td>
+<td align="right">1.4765390</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">37</td>
+<td align="right">8.732432</td>
+<td align="right">1.0852685</td>
+<td align="left">Ciutat de Barcelona</td>
+<td align="right">0.8827802</td>
+<td align="left">FALSE</td>
+<td align="right">0.0402948</td>
+</tr>
+<tr class="odd">
+<td align="left">Hotel Regina</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">45</td>
+<td align="right">9.111111</td>
+<td align="right">1.1162482</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">53</td>
+<td align="right">8.260377</td>
+<td align="right">1.7485532</td>
+<td align="left">Hotel Regina</td>
+<td align="right">0.0059667</td>
+<td align="left">TRUE</td>
+<td align="right">0.8507338</td>
+</tr>
+<tr class="even">
+<td align="left">Hotel Cortes</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">110</td>
+<td align="right">8.326364</td>
+<td align="right">1.3682962</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">151</td>
+<td align="right">8.181457</td>
+<td align="right">1.4923987</td>
+<td align="left">Hotel Cortes</td>
+<td align="right">0.4233179</td>
+<td align="left">FALSE</td>
+<td align="right">0.1449067</td>
+</tr>
+<tr class="odd">
+<td align="left">Occidental Atenea Mar - Adults Only</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">36</td>
+<td align="right">8.450000</td>
+<td align="right">1.5529695</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">39</td>
+<td align="right">7.561539</td>
+<td align="right">1.9522747</td>
+<td align="left">Occidental Atenea Mar - Adults Only</td>
+<td align="right">0.0333221</td>
+<td align="left">TRUE</td>
+<td align="right">0.8884615</td>
+</tr>
+<tr class="even">
+<td align="left">Barceló Sants</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">102</td>
+<td align="right">8.694118</td>
+<td align="right">1.3408157</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">215</td>
+<td align="right">8.551163</td>
+<td align="right">1.4009963</td>
+<td align="left">Barceló Sants</td>
+<td align="right">0.3902397</td>
+<td align="left">FALSE</td>
+<td align="right">0.1429549</td>
+</tr>
+<tr class="odd">
+<td align="left">Pestana Arena Barcelona</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">53</td>
+<td align="right">8.647170</td>
+<td align="right">1.3460203</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">41</td>
+<td align="right">8.951220</td>
+<td align="right">1.1097572</td>
+<td align="left">Pestana Arena Barcelona</td>
+<td align="right">0.2447737</td>
+<td align="left">FALSE</td>
+<td align="right">-0.3040497</td>
+</tr>
+<tr class="even">
+<td align="left">Condes de Barcelona</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">67</td>
+<td align="right">9.056716</td>
+<td align="right">1.1118131</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">78</td>
+<td align="right">8.800000</td>
+<td align="right">1.3957263</td>
+<td align="left">Condes de Barcelona</td>
+<td align="right">0.2278679</td>
+<td align="left">FALSE</td>
+<td align="right">0.2567164</td>
+</tr>
+<tr class="odd">
+<td align="left">NH Collection Barcelona Constanza</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">139</td>
+<td align="right">9.125899</td>
+<td align="right">1.1146806</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">136</td>
+<td align="right">9.006618</td>
+<td align="right">1.2108890</td>
+<td align="left">NH Collection Barcelona Constanza</td>
+<td align="right">0.3959703</td>
+<td align="left">FALSE</td>
+<td align="right">0.1192816</td>
+</tr>
+<tr class="even">
+<td align="left">Acta BCN 40</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">44</td>
+<td align="right">8.372727</td>
+<td align="right">1.3074676</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">40</td>
+<td align="right">8.130000</td>
+<td align="right">1.7832842</td>
+<td align="left">Acta BCN 40</td>
+<td align="right">0.4761153</td>
+<td align="left">FALSE</td>
+<td align="right">0.2427273</td>
+</tr>
+<tr class="odd">
+<td align="left">Ayre Hotel Gran Vía</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">248</td>
+<td align="right">8.881452</td>
+<td align="right">1.3219337</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">163</td>
+<td align="right">8.876687</td>
+<td align="right">1.2229074</td>
+<td align="left">Ayre Hotel Gran Vía</td>
+<td align="right">0.9706537</td>
+<td align="left">FALSE</td>
+<td align="right">0.0047645</td>
+</tr>
+<tr class="even">
+<td align="left">Hotel Market</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">120</td>
+<td align="right">7.930833</td>
+<td align="right">1.6147844</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">88</td>
+<td align="right">7.877273</td>
+<td align="right">1.6728891</td>
+<td align="left">Hotel Market</td>
+<td align="right">0.8161763</td>
+<td align="left">FALSE</td>
+<td align="right">0.0535606</td>
+</tr>
+<tr class="odd">
+<td align="left">Petit Palace Museum</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">51</td>
+<td align="right">8.890196</td>
+<td align="right">1.2734606</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">43</td>
+<td align="right">8.616279</td>
+<td align="right">1.3575065</td>
+<td align="left">Petit Palace Museum</td>
+<td align="right">0.3160811</td>
+<td align="left">FALSE</td>
+<td align="right">0.2739170</td>
+</tr>
+<tr class="even">
+<td align="left">Catalonia Avinyo</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">39</td>
+<td align="right">8.784615</td>
+<td align="right">1.5567406</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">40</td>
+<td align="right">9.042500</td>
+<td align="right">1.2518474</td>
+<td align="left">Catalonia Avinyo</td>
+<td align="right">0.4190580</td>
+<td align="left">FALSE</td>
+<td align="right">-0.2578846</td>
+</tr>
+<tr class="odd">
+<td align="left">Ciutat Vella</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">47</td>
+<td align="right">8.568085</td>
+<td align="right">1.6869198</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">43</td>
+<td align="right">8.232558</td>
+<td align="right">1.2876189</td>
+<td align="left">Ciutat Vella</td>
+<td align="right">0.2951072</td>
+<td align="left">FALSE</td>
+<td align="right">0.3355270</td>
+</tr>
+</tbody>
+</table>
+<p>Ens proposem crear un algoritme que ens digui en funció de les categoriques quin és el millor hotel per nosaltres. Ens plantejem fer el següent. Crearem una regressió logistica per predicció de nota per cada hotel. Comprovarem el grau de significancia de la regressió. Un cop fet això aplicarem la regressió per cada hotel i obtindrem la llista d’hotels ordenat per nota ascendent, per donar-te la confiança i el grau de confiança de la recomenació (1-p_value de la regressió)</p>
+<pre class="r"><code>model.hotel.nota&lt;-lm(notapersona~TipusHabitacio+Nits+ProcedenciaComentari+TipusViatge+Acompanyament+Season, data)
+summary(model.hotel.nota)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = notapersona ~ TipusHabitacio + Nits + ProcedenciaComentari + 
+##     TipusViatge + Acompanyament + Season, data = data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -6.2764 -0.8660  0.4092  1.2202  2.2238 
+## 
+## Coefficients:
+##                                    Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)                         8.73531    0.06284 139.002  &lt; 2e-16
+## TipusHabitacioHabitacio Doble       0.02694    0.04584   0.588  0.55673
+## TipusHabitacioHabitacio Individual -0.20381    0.06498  -3.136  0.00171
+## TipusHabitacioHabitacio quadruple   0.16197    0.11348   1.427  0.15353
+## TipusHabitacioHabitacio Triple      0.09136    0.07169   1.274  0.20257
+## TipusHabitacioSuite                 0.37402    0.14325   2.611  0.00904
+## NitsEstanciade2noches              -0.02786    0.02975  -0.936  0.34908
+## NitsEstanciade3noches               0.05744    0.03307   1.737  0.08243
+## NitsEstanciade4noches               0.01959    0.04124   0.475  0.63473
+## NitsEstanciade5noches               0.06728    0.06151   1.094  0.27407
+## NitsEstanciade6noches               0.01331    0.08910   0.149  0.88122
+## NitsEstanciade7noches               0.25364    0.12961   1.957  0.05037
+## NitsMesde7                          0.31319    0.14164   2.211  0.02704
+## ProcedenciaComentariEnviadoporWeb  -0.07657    0.02590  -2.956  0.00312
+## TipusViatgeViajedenegocios         -0.28948    0.05022  -5.765 8.33e-09
+## TipusViatgeViajedeocio              0.05454    0.03931   1.387  0.16537
+## AcompanyamentGrupo                 -0.06272    0.04589  -1.367  0.17167
+## AcompanyamentGrupodeamigos          0.14206    0.07749   1.833  0.06678
+## AcompanyamentPareja                -0.06786    0.03421  -1.983  0.04734
+## AcompanyamentPersonaqueviajasola   -0.05355    0.04619  -1.159  0.24636
+## SeasonQUART TRIMESTRE              -0.04035    0.03195  -1.263  0.20657
+## SeasonSEGON TRIMESTRE              -0.23790    0.03274  -7.267 3.84e-13
+## SeasonTERCER TRIMESTRE             -0.29866    0.03275  -9.119  &lt; 2e-16
+##                                       
+## (Intercept)                        ***
+## TipusHabitacioHabitacio Doble         
+## TipusHabitacioHabitacio Individual ** 
+## TipusHabitacioHabitacio quadruple     
+## TipusHabitacioHabitacio Triple        
+## TipusHabitacioSuite                ** 
+## NitsEstanciade2noches                 
+## NitsEstanciade3noches              .  
+## NitsEstanciade4noches                 
+## NitsEstanciade5noches                 
+## NitsEstanciade6noches                 
+## NitsEstanciade7noches              .  
+## NitsMesde7                         *  
+## ProcedenciaComentariEnviadoporWeb  ** 
+## TipusViatgeViajedenegocios         ***
+## TipusViatgeViajedeocio                
+## AcompanyamentGrupo                    
+## AcompanyamentGrupodeamigos         .  
+## AcompanyamentPareja                *  
+## AcompanyamentPersonaqueviajasola      
+## SeasonQUART TRIMESTRE                 
+## SeasonSEGON TRIMESTRE              ***
+## SeasonTERCER TRIMESTRE             ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.477 on 16253 degrees of freedom
+## Multiple R-squared:  0.01885,    Adjusted R-squared:  0.01753 
+## F-statistic:  14.2 on 22 and 16253 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>En termes generals la nota no es pot explicar a través d’aquestes dades perqué el valor d’R^2 é smolt baix, pel que no som capaços d’explicar tota la variabilitat, és a dir, ens falten informació (regressors) que ajudin a predir el comportament.</p>
+<p>Anem a plantejar una altra estrategia, en aquest cas determinem que una persona recomana un hotel X si la nota que ha posat (notapersona) és superior a la nota mitjana de l’hotel (notaHOtel), per fer això, crearem una variable binària (Recomana amb valors S/N i mirarem de treballar amb una regressió logística)</p>
+<pre class="r"><code>data.regressio&lt;-data
+data.regressio$recomanar&lt;-ifelse(data.regressio$notaHotel&lt;data.regressio$notapersona,0,1)
+
+model.recomanancio&lt;-glm(recomanar~TipusHabitacio +Nits+  ProcedenciaComentari + 
+    TipusViatge  + Acompanyament , data = data.regressio)
+summary(model.recomanancio)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = recomanar ~ TipusHabitacio + Nits + ProcedenciaComentari + 
+##     TipusViatge + Acompanyament, data = data.regressio)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.6321  -0.4118  -0.3790   0.5724   0.7228  
+## 
+## Coefficients:
+##                                     Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)                         0.393295   0.020064  19.602  &lt; 2e-16
+## TipusHabitacioHabitacio Doble      -0.012898   0.015248  -0.846  0.39764
+## TipusHabitacioHabitacio Individual  0.058785   0.021614   2.720  0.00654
+## TipusHabitacioHabitacio quadruple  -0.081701   0.037750  -2.164  0.03046
+## TipusHabitacioHabitacio Triple     -0.032983   0.023849  -1.383  0.16668
+## TipusHabitacioSuite                -0.103818   0.047654  -2.179  0.02938
+## NitsEstanciade2noches               0.024415   0.009893   2.468  0.01360
+## NitsEstanciade3noches               0.010555   0.010986   0.961  0.33666
+## NitsEstanciade4noches               0.024995   0.013682   1.827  0.06775
+## NitsEstanciade5noches               0.017771   0.020434   0.870  0.38448
+## NitsEstanciade6noches               0.009589   0.029634   0.324  0.74626
+## NitsEstanciade7noches              -0.083139   0.043108  -1.929  0.05379
+## NitsMesde7                         -0.055254   0.047102  -1.173  0.24078
+## ProcedenciaComentariEnviadoporWeb   0.040254   0.008612   4.674 2.98e-06
+## TipusViatgeViajedenegocios          0.097503   0.016699   5.839 5.35e-09
+## TipusViatgeViajedeocio             -0.009088   0.013067  -0.695  0.48677
+## AcompanyamentGrupo                  0.017822   0.015256   1.168  0.24276
+## AcompanyamentGrupodeamigos         -0.034838   0.025780  -1.351  0.17660
+## AcompanyamentPareja                 0.016070   0.011368   1.414  0.15750
+## AcompanyamentPersonaqueviajasola   -0.002819   0.015352  -0.184  0.85432
+##                                       
+## (Intercept)                        ***
+## TipusHabitacioHabitacio Doble         
+## TipusHabitacioHabitacio Individual ** 
+## TipusHabitacioHabitacio quadruple  *  
+## TipusHabitacioHabitacio Triple        
+## TipusHabitacioSuite                *  
+## NitsEstanciade2noches              *  
+## NitsEstanciade3noches                 
+## NitsEstanciade4noches              .  
+## NitsEstanciade5noches                 
+## NitsEstanciade6noches                 
+## NitsEstanciade7noches              .  
+## NitsMesde7                            
+## ProcedenciaComentariEnviadoporWeb  ***
+## TipusViatgeViajedenegocios         ***
+## TipusViatgeViajedeocio                
+## AcompanyamentGrupo                    
+## AcompanyamentGrupodeamigos            
+## AcompanyamentPareja                   
+## AcompanyamentPersonaqueviajasola      
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for gaussian family taken to be 0.2415226)
+## 
+##     Null deviance: 3968.5  on 16275  degrees of freedom
+## Residual deviance: 3926.2  on 16256  degrees of freedom
+## AIC: 23086
+## 
+## Number of Fisher Scoring iterations: 2</code></pre>
+<pre class="r"><code>pred=predict(model.recomanancio,data.regressio,type=&quot;response&quot;)
+corba&lt;-roc(data.regressio$recomanar,pred)
+graf=plot(corba,print.thres=&quot;best&quot;, print.thres.best.method=&quot;closest.topleft&quot;, main=&quot; Corvesa ROC. - Llindar óptim&quot;)</code></pre>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAABCFBMVEUAAAAAADoAAGYAJkQAOjoAOmYAOpAAZpAAZrYmAAAmX5E6AAA6ADo6OgA6Ojo6OmY6ZmY6ZpA6ZrY6kJA6kLY6kNtEealmAABmADpmOgBmOjpmZjpmZmZmZpBmkJBmkLZmkNtmtttmtv95kZGQOgCQOjqQZgCQZjqQZmaQZpCQkDqQkGaQkJCQkLaQtraQttuQtv+Q29uQ2/+RX0SRqampeUSpqam2ZgC2Zjq2kDq2kGa2kJC2kLa2tpC2tra2ttu227a229u22/+2/9u2///bkDrbkGbbtmbbtpDbtrbb25Db27bb29vb2//b/7bb/9vb////tmb/25D/27b/29v//7b//9v////m731FAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3dfYPT5sLgZzsLKe00ENKllJxJOVB2Oe2zT+imbYbDNpNCMwEWssswYH//b7KS5RdJlm1JliXd0nX9EWY8HlvW2L/o5ZY0mQNQy6TrCQAIlYAC1CSgADUJKEBNAgpQk4AC1CSgADUJKEBNAgpQk4AC1CSgADUJKEBNAgpQk4AC1CSgADUJKEBNAgpQk4AC1CSgADUJKEBNAgpQk4AC1CSgADUJKEBNAgpQk4AC1CSg0L7Zs0nkTteTwbEEdDBu/uVu/KG8df9F11OS8/lsknbr3uO/cveY/ae/fRf/6O73Lz5t//7xL+zrw+j3p7/suXnHPXa5ODZ/1/EDfFvwYre9/Xvyb8VJpBUCOhDvHm0SNX3S9dRk5AIa+yGdjpsf0z+6/yb72028sP4FNH6Ab/4occfo5T9IvhLQPhLQQZi93BOorhUENL3w9Wfux5lKNvPCehfQeJaUebab59HzCGiPCegQJFvUdgSqc0UBXVVhPr/a87OmXljvAhr//tOyzyOgPSagQ3CRLLrF2xa/vDrLRahzi4CuP/lfni+mb7X+uuzn7Xjj52y1ur6e+IZe2OGAVnRkQOMnLvU6Lnr2pyRPQAfgOrNsdvMwHageyAZ0VcWnm5+lGvE2Kebyzk29sL4FtNrzCGiPCWj4vubCkkSpPx+7fECvN81crqKntnqmm9nYCxNQTkRAw3edWqJbuMhuLPzwPB4jlB4FdJV8Lv+Mbr/1+N9nYpCJyofncbLuZoYdvVuOOMoMKvryajHSaHrvccEmynxAUx1MvsyU6GKzCHrohZVWaRvo9XLqFi9+mhkU8C4eL3DryadsQLdffGb+bk/ujj/I0/nsVfyDe8vbk5c/Wc2E1CReJF/NFk+8vPti2u4WzX9OSEDDd5Ffs72efv+vr1efpM+bYUC3V5/Y5AO+3MH9v56lf/1q06ibzR6c9c7v9A6h2+sipXakT/++NX17Ano1meTLlvrp/hdWQY2A3qxn23oBcH3T7TfpgBa8+Mz8ze8s2vkHefr2bP0E6wnZE9D1E0d/rvW02cvULgENXrKiu2t9MruT+0HqxrvJTd/8/89SH/PZ5pvMzvPlYt91Zof66sNa+Bwbu1fhk2fLLlJubtv/wqqoHtDvz7ZeUGp+TL/bTFnRi8/M39w2291/kPPcnD0Q0Lupv85/3kxbjzZ+j4GABm/vlsH0hzD3AV/fklroTB5s8RlM8rW2qEXutuUv5YYpbX2CcwFNCrn4vjCR6+XO5rblVg/o9gvaHlF1Z+eLz87fjMN/kPXj7A/oTjaZtklAg7e1pTAlKdQ03jKWrB8mH8DU5zW6IZ2Xq3UZkm2RTz6txrI/XT3VN/8x+urL5sbknvFaZ7IeuRWqTEC/fHiWr0/uE79erd/3wqqpE9B49frd2WYSrta3rjZtbGZT/sVn5+/WU+78gywe/VEqgzvGgS4D+sNf89k/l89z+/XqEfs0BHj4BDR4+zqT2iMzTz67i4/X8vO62rK5+ZguFrM2C4f5ql6lPs8Xt376+a959p5JELc2+hUMpE/fv5cBTTK0mYRkAXS5dH2xDmjxi8/N35S9f5DkOdPPtDegqcYuf/UqNY20QkCDt6czyUf0QfqOi09g+vM6T5/ZYhGBxVfXq0SsHib+XCZty5/TY/b+H3fvpJ6vRECXCelxQJ+mXtCDee7/DanBA4UvPjd/c8+48w+SfvRUKXcEdBnK9K9eC2jbBDR4ezqT/UAlizbxx/Eq+yubPUebRcz0R3e9XLpK4a2ffi9cTywZ0Olq0ay/AV3eeTPLMrOy8GR0WwEtmPK9f5Dso2/9FfIBXfY5/av53XWcnIAGb09n0ruH5qnh3/nRQ6t19MVHd/Fh3N5lEj9D+tZp/rRJsw//8l3hpOQCevtN7id9DOiySLnErWfl1kD67IsvGJ2Vem27/iDZRz8Y0OXTpydXQFsnoMHbs7P6Kvs5z27LTK3qrfa9b9bbCwIaP8PXR+lbNim8efXjppKFAY0/1svD2Tef8Ib3wqcGCdzZ/kGdgG4Klk1cZsZuv/id2yL3/kHWt2/6WDag6TEUAtomAQ3edoU+33uRWr3b9XlNb6K7SD77F+sE7AjofPYqvTi5/Ky+zS5i7gzoehzp6h6ZPTOZl1M8DnT9wvbNiUYC+m1+/9rOgBa9+K35O9/+vcy3AhoqAQ3edoXij+NiBbvcGuN8tcto8RFN7wouXPr78uq7bKeWR9zc/en3/7J7G2h6h/7mM36xXdz8MPvCF1bslAHNnkJ+U7DCF78/oCdYhRfQrgho+PK7LDbhKdpnsd5XlP6AJ/vZfzvbfFzTH91tH/9Tchb59ZMku+b37ERafawvJulp+rw1cjE1zH7PCyt28oBu70QqfvE7A7r3D1JxJ5KA9oGAhi9/0qKrdUL2jprJfMDXBx9mDs/MN2D24dWP/+PyDusPa+pDXiKgy8gtP/3LLQWpUKdHAO1+YRU1ENDMS9sMYyp+8TsD2uQwJgHtAwEdgOyww8+pPTXb47bvrH8h8wFf7ynPPkry2b2efv/4dX6j5GrHU3plv3j4TvZjvTzQJ5Oiyb/NbFzMHWRf9MKqaSCg6aXf2fpgqh0vfmdA9/5BJt+82Tx68tsC2ncCOgTJevHiAMHlMZbLj9eyOYVHDmY/4BeTTNhWN/zwaT77c72evTzqJf6cJyePj25crnM/2Tz1/oBmDp1ZH7QTnyNuzxnpi19Y6VQ0ENBl+FMHW24CuvXidwd03x8keaDtQzmj+f3hLwHtJwEdgt2XDsqfpeLp5tbsB3y5YJg/e3H2N/MnE9lsv0vLbznNfayXD7K618v8r5e6JlKNgG4/TqWAFp9MpPjF7w7ovj9Iwctc3/5AQPtJQAchf/HKzYd399nTsh/w7LbJWPbUdclv5qr6IPWbC3fPJtsbKYtPZ7e+odJVOTOr860GNDMG9vvV6yx+8XsCuucPcnvzBKtXtp7fAtpTAjoQOy+fnvrB+gzIRR/w7aNnbh5tP+LN8+2nWZ8hePpkfdR8Wv5jvVyWWz9/+jHLXhe+g4DOZ+vpfPB53crCF78voHv+IP919QSbIxRW//+4I6D9JKCD8eEfi1PsZq+1Ebv5R3IFidfrW4o+4JvziKQecnHtiWlm+PrNvyye5lbqxtnb+KbFxSuKRj9tfazzV5Kbz5bXCbn1fdFA+aIX1kVAoylZXNLj8V/zTUALX/zegO77gyyuy3Ev/QdMriLy/QsB7ScBhc4dKC69JaDQOQENlYBC5wQ0VAIKnRPQUAkodE5AQyWg0DkBDZWAQucENFQCCp0T0FAJKEBNAgpQk4AC1CSgADUJKEBNAgpQk4AC1CSgADUJKEBNAgpQk4AC1CSgADUJKEBNAgpQk4AC1CSgADX1O6ATgMY0n6jGH7FBXc9tIO3XX3/tehKO1Hijmn7AJp3gfxhAXVE/u56E4wgo0JHg+ymgQEfC76eAAt0YQD8FFOjEEPoZYkBnH99fXl7+/rHONa8FFPphEP0MLqAfnqcGENx/XfXXBRR6YRj9DCygN49yY7Bu/1LtAQQU+mAg/QwroNdncTTvnie+i7+ZPq30CAIKPTCUfgYV0K8Po2C+SN3wLgrqN39UeQgBhe4Npp9BBfRqK5dxUh9UeQgBhc4Np58hBXT2bDLJr7BfTybfVtkbL6DQtQH1M6SARoubW+vrRbftI6DQsSH1U0CBNg2qnyEFNFqFn+ZHLVmFh6AMq58hBXR+sVXLeLPonSoPIaDQpYH1M6iAfj6LCvomdcNN1M+thdK9BBQ6NLR+BhXQeBxTVMzzny9jvyUj6SuNYhJQ6NDg+hlWQOdvz3KHck6fVHsAAYXODK+fgQV0PnuVTuj0cdUzMgkodGWA/QwtoJHZh8tX5+fnjy9f1zifnYBCR4bYzwADehQBhW4Msp8CCrRgmP0UUOD0BtpPAQVObDLYfoYe0P3Hwk8KtDdtQCz+3A20nwIKnNKwP3eDDui24f4hoY+GvuASeEDnXz7+VeXuw/1DQg8NvZ/BB7SiAf8loW8Gn08BBU5jlc+h7j9aEFDgBEbRTwEFTmAc/RRQoHGreg51/PyagALNWo+6Hnw/BRRo1mQ0y58CCjRrNXZpDP0MKaBfHxYdmulIJOiT1dDPUfRTQIHmTMbVz5ACOr95JKDQY5Ox9TOogM5nz6pexjhPQOFkxtfPsAK6KOjTYx5AQOFEUke+j6afgQV0XvX0dXkCCieQ2qY2H1M/Qwvo/Pq4lXgBheZl8jmmfgYX0Ggl/phFUAGFxmXyOap+BhfQ+efz8/+z/m8LKDQtk89x9TO8gB5HQKFh6XqOrZ8CChxj1P0UUOAI4+6ngAL1jbyfAgrUNvZ+CihQ1+j7KaBATfopoEA9+imgQC0T/ZwLKFCHfi4IKFDVRD8TAgpUk8/nePspoEAlE/3cEFCggq18jrmfAgpUsJXPUfdTQIHytvI57n4KKFCafuYIKFCSfuYJKFCOfm4RUKAU/dwmoEAp+rlNQIEy9LOAgAKHWX8vJKDAQcbPFxNQ4IDtwzf1MyGgwH7b+dTPJQEF9ilY/NTPFQEF9ijIp36uCSiwU9Hip35uCCiwS1E+9TNFQIFihYuf+pkmoEChwnzqZ4aAAgWKFz/1M0tAgS078qmfOQIK5OlnSQIK5OzIp35uEVAgSz9LE1AgY0c+9bOAgAIpuxY/9bOIgAIb+lmJgAJr+lmNgAJLO/OpnzsIKLCwa/DnXD93ElAgpp81CCgw37f6rp+7CSiwe/DnXD/3EVBAP2sSUEA/axJQGD39rEtAYez0szYBhZHTz/oEFMZNP48goDBq+nkMAYUx08+jCCiMmH4eR0BhvPTzSAIKo6WfxxJQGKk9pw/Rz5IEFMZJPxsgoDBK+tkEAYUx2pNP/SxPQGGE9LMZAgrjo58NEVAYHf1sioDC2OhnYwQURkY/myOgMC762SABhVHRzyYJKIyJfjZKQGE89h1+pJ81CCiMhn42TUBhLPSzcQIKI7Evn/pZj4DCOOjnCQgojMHe1Xf9rEtAYQT08zQEFIZPP09EQGHw9uZTP48goDBw+xc/9fMYAgrDpp8nJKAwaPp5SgIKQ7Y/n/p5JAGFAdPP0xJQGKwDq+/6eTQBhaHSz5MTUBgo/Tw9AYVhOpBP/WyCgMIg6WcbBBQG6NDqu342Q0BhePSzJQIKg6OfbRFQGJpD+dTPxggoDIx+tifcgM4+/P5X5V8SUIbu4Oq7fjYotIC+v7x8E/978yh+k0z/XvHXBZSB089WhRXQt2fxe+PbT/Prs+X7JPq6CgFl2PSzXUEF9Gr57rjz9WG09Hl+/l38daVHEFAG7WA+9bNZIQX0c7TYefvn36KV979NJg/iW+KiPq3yEALKgB1e/NTPhoUU0ItkjX32bLPgeVFxEVRAGS79bF9AAY3DuVjcvI7W339JbosWSittBRVQBks/OxBQQL8+nHzzR+aLzJelCChDdTif+tk8AYUh0M9OBBTQaBU+WXOP1tutwkNKidV3/TyFgAK63mMU/ZvshF/shrcTidHTz66EFNDr6C3yw8ePLyeTu5tlUcOYGD397ExIAV0sei4OP/rPUTjvX14+r3wokoAyPCXyqZ8nElRAZy8X75Ro6XN1TFK1XUgCygDpZ4eCCuh8/uEfd+89jpc5/0wOhr9f7VB4AWVoyqy+6+fJBBbQjdn7f5z/XPl8dgLKsOhnt4INaD0CyqDoZ8cEFIJVJp/6eUoCCqHSz84JKISp1Oq7fp5W4AHdfyz8pEB70wanpJ99IKAQIv3shUEHdJuAMgzlFgf089QCD+j8y8dKY0EFlCEouTqlnycXekArElAGQD97Q0AhMPrZHwIKYSm5N1Q/2xBgQGcf319eXv7+seJ5RBYElNDpZ5+EFtAPz1NDku6/rvrrAkrYyo7G0892hBXQm0e5UZ23f6n2AAJK0PSzZ4IK6PXiJKB3zxPfxd9MK13RQ0AJmn72TUgB/fowCuaL1A3vzqqekl5ACVjZg+n0szUhBfRqK5dxUh9UeQgBJVilD0bWz/YEFNDZs+1LcF5XvKqcgBKo8idz0M8WBRTQouPeHQvPOOhnPwko9F6Fk4npZ6sCCmi0Cj/Nj1qyCs8IVDgVo362K6CAzi+2ahlvFr1T5SEElPDoZ3+FFNDPZ1FB36RuuIn6ubVQupeAEpwKZwLXz7aFFNB4HFNUzPOfL2O/JSPpK41iElCCo599FlRA52/PcodyTp9UewABJTD62WthBXQ+e5VO6PRx1TMyCShh0c9+CyygkdmHy1fn5+ePL1/XOJ+dgBIU/ey58AJ6FAElKPrZcwIKvaWffSeg0Ff62XsCCj1l/Hz/CSj0kuOPQiCg0Ef6GQQBhR7SzzAIKPROhXzqZ6cEFPpGP4MhoNAz+hkOAYV+qZBP/eyagEKv6GdIBBT6RD+DIqDQI/oZFgGF/tDPwAgo9Id+BkZAoTf0MzQCCn2hn8ERUOgJ4+fDI6DQD/oZIAGFXtDPEAko9IF+BklAoXvOHxIoAYXO6WeoBBS6pp/BElDomOM3wyWg0C39DJiAQqf0M2QCCl3Sz6AJKHSnyu4j/ewhAYXO6GfoBBS6op/BE1DoSJV86mc/CSh0Qz8HQEChE/o5BAIKXdDPQRBQ6IB+DoOAQvv0cyAEFFqnn0MhoNA6/RwKAYW26edgCCi0TD+HQ0ChXY7fHBABhVbp55AIKLRJPwdFQKFF+jksAgrt0c+BEVBojX4OjYBCW/RzcAQUWqKfwyOg0A79HCABhVbo5xAJKLRBPwdJQKEF+jlMAgqnp58DJaBwcvo5VAIKJzbRz8ESUDgt/RwwAYWT0s8hE1A4JdePGzQBhRPSz2ETUDgd/Rw4AYWT0c+hE1A4Ff0cPAGFE9HP4RNQOIlKw5f0M1ACCqegn6MgoHAC+jkOAgrNq5RP/QyXgELj9HMsBBSapp+jIaDQMP0cDwGFZunniAgoNEo/x0RAoUn6OSoCCs2pNvxTP4MnoNAY/RwbAYWm6OfoCCg0pFo+9XMIBBSaoZ8jJKDQCP0cIwGFJujnKAkoNEA/x0lA4Xj6OVICCseqOHxJP4dDQOFI+jleAgrH0c8RE1A4SsV86uegCCgcQz9HTUDhCPo5bsEG9Mv7y9efKv+WgNIo/Ry5wAL64cdv/oj+mb06W7xxb7+o+PsCSpP0c+yCCujs+WQSB3T2bLLyQ7WlUAGlQfo5eiEFdNHNKKCLf6fn5+fxYuidSg8hoDRHPwkpoNfRu/Xffkr+fRDfMPtnFNJfqjyEgNIY/SSogF4su3mxWe68qLgIKqA0RT8JKqBfHyaLm6t/Y5/PJt9W2QoqoDRFPwktoItd8Kt/57mvyxBQmmH5k1iAAZ09E1A6pp8sBBTQeOf70/iLi80q/PXEKjztc/4QEgEFdH6VjAKNN3wu9xzFTX1Q5SEElAZY/mQppIBG6+uT22/mi5Imw5heGsZE+/STlZACOr+OR87f+/njx39GJX382/OzScUFUAHlePrJWlABjVfec6r1U0A5nn6yFlZA12cRWXIyEVqnn2wEFtDIl9/Of7wbuffTz05nR+vsfyelo4DOfm/6acsRUI6jn6R1FNCvDyf3Xjf9zCUIKEfRTzK6C2jkfusNFVCOoZ9kdbUN9N2jxVtxev9N08+/l4ByBP0kp7udSLNX3yUNffxX/Sfbfyx8fsxTtd2nkKWf5HW6F37V0FuPq+9PTwgordFPtnQ9jOnL+vJwtRrqbEy0xPlDKNB1QOfrhk5rLYZ++VhpA4CAUo9+UqT7gL57vlq7rnZekFoElFr0k0IdB/Tdj8sV+A/PWymogFJH1e3n+jkWXQZ0uey5XHePz+1Z7RrFNQgoNegnO3QW0A/LNffNQNDPZ+V2CM0+vr+8vPz9Y51NpgJKdfrJLp0eiZQ9m1KpPeof1ltMax3JJKBUp5/s0mFA87vdo9sOXd/o5lFuVOftiltNBZTK9JOdOgtowTGcHw/91uKM9JO754nFIPzp02oTJ6BUZP87u3U/jKm8xWJreqX/3dmk2jh6AaUq/WSPrs4H+v7y99Tq+vtXZUbRX23lMk6qq3JyOsZ/sld320BTLSx3QOb6uvAprgvPCVU+gYJ+jk1AAS26l2PhOR395JD2A/pnvAPob2eT6ffnK49KbcoUUNqlnxzSfkC3L00cK3EMUrQKv3Wsp1V4Tqbi8CX9HKMOVuEvCvp5u8xi5MVWLSsf/imglFT18CP9HKUOAjq7vLz8LVqF//ly7eAI0IV42fXb9PDRm2dVT0AioByS+T97+V/Tz1HqxU6ksq4WQ+fPk/L+loykrzSKSUA5RD+poB/jQMt6m99+On1SceIElP30kwpCOhJpHl9FKZ3Q6iexF1D2q1NP/RyvwAIamX24fHV+fv748nWNRVgBZb9aAdXP0Wo9oMnWz+Xp7DZqbBGtQ0DZz/o7VQgopNQIqH6OWPsB/fHuvT/i/2bdE1B6QT+pILxtoEcRUParvACqn6MmoLBh+ZNKuhoH+v/WuSTc8QSUfex/p5rujkS6/aKDhgooe+gnFXV6Vc57la+qeSwBZTf9pKqutoG+S66vOS24ttwpCSg77e/nzfOz/Ps108/PZ7nrJXx9mBqbN3t1N3rsWzve7lerc4oVPMny959txletnmbHnbcm5ODr2P0Us7fxZN998mk5mRkPFr9T7aqOg9PdTqTZq++ShlY+HvMIAsou+/u5Og3D9O/rmzL9jNepMi2J2rIJ6OYkDj8UPPbns+U9C54k9fC5uu2489aEHHwdu59ife7e5HST2wHdTPpYdboX/svyyPb2NocKKDvs7+f19tJZdv39YpLt1uwidXRI6rcLzl+7XowreJKC5z9w5/yEHHwdu58ide7zxYl4CwIa3VbpjOaD0/UwpsUKReR+O38FAaXY/n7GS2e3o7XeD5urz2T7eZ1L0mJ9eBXQxW/H2/vjX98+ge2qQQVPkrrP1gaC4jvnJ+Tg69j/FPHpzhZn8Hmwdec7qztVO6PkwHQd0MiH5xOHctKt/f2Me5FELg7jIhjZfiarv5v+vFssFqze1Nfr5c6iSyist1luP8nGRf4TsuPO+Qk5+Dr2P8Xylq0r56RuuGrrs9tP3Qd09u5HAaVbB/qZuhxXlLs4Hdl+xts7/4/U3p14D+n9R+s39cXmR8tfT7vYNC33JJkn2Lqh6M65CTn8Oso9Rf5yZFGm19+PfBG064Au6tneniQBpcCBfs6jSKzikrQkN34pXvtNrQFfxau+mZ1IRY+0FJXsQfGTZH8tu+C64865CTn4OvY9RTRhu643dpFefB33IminAV2svMf/s25tPKiAsu1QP1Pr4MniZK6fiwamAzr94dO8bECvViHLP0luAp7exMsa914UT1HxhBx6HYeeYseiZXaNfv1/gFHqLqCr3Ue3XzQ9BXsIKFsO9jPTkqhP/3O2n8nKb6pbXz7N5zsCep3fBropau5JMnWLKvu35b7vZHdr4Z23JuTA69j/FIs7LD6lt7IXzsktvG7/P2FMujoWfjmAqdVBoHMBZdvhfmZiE0Xof8gef3Sx6Ek+SIUBTW88TGyW33JPklmqS18KfDWiaPvOxROy+3Xsf4r40VYDlzKXHb/K/U/gouKlcQely0M52z4MaS6gbCnRz62AZn64LFGZgMaDQ3PbFTe/tqdu8T7zxbLGzfPJ9rOt7rxjQna/jv1PcbFZJM3s5N36n8CeJxy+7gJ6r81V9xUBJatMPzOJ+H9yS26rNdgSAc0Mrl/aLL7tqVuqWcuxRQV33jUhO17HoadIjuyMl3G+vJyku7+1FWL3xtIR6GoVvs5FjRsgoGSU6mc6PL/mA7oaPnk4oIuFvNzKbupe+9avsw/ytPDOuyak+HUcfIpFQB+s77ue8K3d9/t21w9f18OYWiagpJXrZyo8v+YDuv7RwYDeFB2GVDmg8d0eFN1554QUvo4ST3GR2te+dySrgDb7iE0/YJMElJSS/dzE5tdff832aROPQwGNz+Jxe2uvUupe+3aRb03L1p13T0jR6yhzt/Rgz9QvXm2Ft+DggPFwVU5Gq2w/15v94vGf2fGTufNrpNqSC2h8xx+2M5MN6M5BmtlpeVBw590TUvA6Sj3FVWFAt9fgLYE2/Ij7fyyg9ETpfs6X+2fifuYCUjagL3c0LXWvfYcJpSRLjlt3LhXQSk+Rru0mpgWLmwLa7CPu/7HLGtMP5fuZPn4zF5CSAb0qOgvTwkXRAef5SqUWBpd7y7fuXCqglZ4iusf6BWwWV7fX4O2Fb/gRm37AJgkoSxX6mZzF6P+O+1lwFqPNXXZuA40S882OMc/ZQ+h3nCpp07L1SNLdd943LLPSU8T/Jo19u1lFLBg1bxxos4/Y9AM2SUBJVOrnPN7k9G/+t+LzaC7tCej28UcbqSPJV6cN3X6SxQCo+LoamxOK7r7zvp5Veor4fMrxnb+ktj8UHR7gSKRmH7HMnWbvL9MjQd+/cjYm2lStnwVncj94PE52gFLK1kmQ1qvSu58kdW741NjM7J23J6Qg3JWeIjXdq2ksOPDdsfANP2KZOyW7koq/OyUBJVa1n/Nf/6//fpm/5bWEKgQ0fbW2rYBuzsYU+fNs15N8fjTJ/mj7ztsTUrTkW+spNheMKNiHNOpNoALKCFXv56+/5q5mWSGguSEnO88mMt+6ZGbqSZLzjt96/Nd81523J6Rw00Glp/gSX/lxmrr8eMEe960z2Y9K+wH98zzyt7PJ9Pvzld0blhqfOAGlZ9d/vzjhGvDV6bdOOiN904944OfpbS0bLQ0kE1B61s9D13E/ysXpF0zGfUL6LlbhLwr6uX2M22kIKD3r5ymvDDx7dvLdOyNfAO0ioLPLy8vfolX4ny/XPjY9EbsI6Oj1rp/zqEEnWgS9Ov0ATdeFb/wRy9ypvd1GWQI6dv3rZ7wSf5oPw+zfPZTf/2oAABpQSURBVDl8p+N8PhvxGNBYP8aBtkZAR66P/YwX4wI9mHz2bMQHIS04EokR6Wc/CZeAMh76ScOczo7R0E+aJqCMhX7SOOcDZST0k+bZBso46CcnIKCMgn5yCgLKGOgnJ9F5QOOrvW6dketkBHSc9JPT6C6g7x7Fe96vik6ReDoCOkr6yYl0FtCrxdCl1bnt2jowXkDHSD85la4CGpczquYio7uvdNg4AR0h/eRkugpocn3VOJ13FldVcUJlTkQ/OZ2uzsb0bLHdM14OfeqaSJyQfnJC3Z4P9CrZfySgnIp+ckrdBvQi2X0koJzGRD85qU4DutwEWnSx6RMR0FHRT06su22gk6erTaDxgqidSDROPzm1DvfC33797xdr8LN/TiZtXRhAQEekcj71k6q6CujqhKAPkq/auiSMgI6HfnJ6nR2JlByD9O2neRzQH9q6wJyAjkX11Xf9pLrujoWfvTv/6XX079f/5f7rpqdhJwEdCf2kFZ2fjaldAjoO+kk7BJThqZ5P/aQWAWVw9JO2dBjQ9/843/jJQHoaop+0puO98C5rTMNqbP7UT+rq8nygAkrj9JM2dXgk0uTezx/X/mp6MooJ6MDpJ63q8Fj4to4+ShPQYauRT/3kCN2djam1C8mlCeig6Sct6/Z8oK0T0AGrs/qunxylu1V4AaVR+kn7OtyJ1NIZ7DIEdLD0kw50eDq7LhZBBXSo6uRTPzlWlwPpp48/Nv3khwjoQOknnehuJ5KB9DRGP+mGgBI+/aQjXQX0x7tZ9wSUuvSTrjidHaHTTzojoIROP+mMgBI4/aQ7nQb0y+Xl75/ms5bOxBQT0KGx/k6XOgzo2++Sve9fH95+0/RE7CKgA+P4IzrVXUBfroYvtXlmJgEdFv2kW50FND6j8u3/cBYFND436LftXBJJQIfF+jsd6/KSHk/mXx/GA+jjgrZ0ZhEBHRL9pGtdBfRicUb6JKDz69ZOTy+gA6KfdK6784HG2z2XAY0WR1tahxfQ4dBPutftGemXAW3v3HYCOhj6SQ8IKEHST/rAKjwh0k96ocOdSA/WAb2yE4lK9JN+6Cqg18sx9HFAo68NY6IC/aQnugpoPPZz+iIO6Oyfk1oD6Wfv4wPpq06cgIav1uFH+skpdHYkUuac9HUO5ay150lAw6ef9Ed3x8LHy6BLtU4mIqDjpJ/0SJens7t5Hp+PaXr/dcn7f/mY9iEK6Ovo30onwxPQ0NXKp35yIgGdUHnrQnST1fmcKkycgAat3uKnfnIqAkowJvpJz3Qd0A//OH9cdgvo27Nohf985W9nk+n30b8/VdkVL6AB0096p5OAzl6eJcuNN48Wn4j7JRt48yy1w8lOpJGpmU/95IS6COj12XLFe71SfrtsCf+MFjv/nnwpoONSM5/6ySl1END4XMpJ+y6idL74+OqswpGc8TLrt4uFUAEdFf2kj9oP6Gy9Hh6VdHUukfIj6eMDl6ZP5gI6LvpJL7Uf0Ov1jvOrxQlF5qszi5T1+dFiq6mAjoh+0k/tB3Rdy+Up7eaLplY5GH72MjmOXkDHQj/pqdYDusnmpoCrdfnS4gFN31f9pcXECWiA9JO+aj2gmWzeyd9W1s2zymPok4kT0PDoJ73VYUDXm0DnddbG/zwT0HHQT/qrw4BerPe9V16Fj938o9pBSMnECWho9JMe624baGqxs+JOpCMIaGj0kz7rZC/84vodm02g8U2uiUQR/aTXOhkHuljcvFhfCCk+NMk1kSign/Rb+wGND4C//frjy/U+oJuH9dfg9+9+Kjr7Xb3noRv6Sb91cCz89apl8VLn7N3zSb1rIi0I6KDpJz3X1dmYJsuzKi1OyDStvQJfdQCUgIZEP+m7bs4H+u78/HFyLaM4oPfqXFNu6YtrIg2W83/Se12fkX72v1+2M4ApIaDh0E/6r+uAtkxAg6GfBEBA6SX9JAQBBnT28f3l5eXvH+us+gtoIPSTIIQW0A/PU0OS7r+u+usCGgb9JAxhBXR5Fc+N2xUHkApoGPSTMAQV0GQA6d3lheG/m1QfQiqgQdBPAhFSQOMxo9MXqRveVT4nqICGQD8JRUgBvdrKZZzUCpejE9Ag1NsAqp90IKCAxtdDzq+wVz2TqID2n34SjoACWnTcu2PhB0c/CYiA0iv6SUgCCujmgsgbVuEHRj8JSkABjc9hn6tlvFm00sVABLTf9JOwhBTQ+NIf36ZPfRdfHb7auZgFtNf0k8CEFNB4HFNUzPOfL2O/JSPpK41iEtBe009CE1RA52/PcodyTp9UewAB7TH9JDhhBXQ+e5VO6PRx1TMyCWh/6SfhCSygkdmHy1fn5+ePL1/XOJ+dgPaWfhKg8AJ6FAHtK/0kRAJKH+gnQRJQekA/CZOA0gP6SZgElO7pJ4ESULpXJ6D6SQ8IKJ3TT0IloHRNPwmWgNKtSZ098PpJPwgondJPQiagdEk/CZqA0qFaA+j1k94QULqjnwROQOmMfhI6AaUr+knwBJSO6CfhE1C6oZ8MgIDSCf1kCASULugngyCgdEA/GQYBpX36yUAIKK3TT4ZCQGmbfjIYAkrL9JPhEFBapp8Mh4DSLv1kQASUVuknQyKgtMn5kxkUAaVF+smwCCgt0k+GRUBpj34yMAJKa/SToRFQ2lJjA6h+0m8CSkv0k+ERUNqhnwyQgNIK/WSIBJRW6CdDJKC0QT8ZJAGlBfrJMAkop1d9A6h+EgQB5eT0k6ESUE5NPxksAeXE9JPhElBOSz8ZMAHlpPSTIRNQTkk/GTQB5YT0k2ETUE5HPxk4AeVk9JOhE1BORT8ZPAHlRPST4RNQTkM/GQEB5TT0kxEQUE5CPxkDAeUUKq/A6ychElBOQD8ZBwGlefrJSAgojdNPxkJAaZp+MhoCSsP0k/EQUJqln4yIgNIo/WRMBJQm6SejIqA0SD8ZFwGlOfrJyAgojdFPxkZAaYp+MjoCSlP0k9ERUBqin4yPgNIM/WSEBJRGVN0Aqp8MgYDSBP1klASUJugnoySgNEA/GScB5Xj6yUgJKEeruAFUPxkMAeVY+sloCSjH0k9GS0A5kn4yXgLKcfSTERNQjlJtA6h+MiwCyjH0k1ETUI6hn4yagHIE/WTcBJT69JORE1Bqq7QBVD8ZIAGlLv1k9ASUuvST0RNQatJPEFDq0U8QUGqqEFD9ZKgElFr0E4IL6OzVj3e//9dP6++/Ppx880eF3xfQhugnzEML6J9niw/u9PEqoQLajQojmPSTAQsqoFeTlW+XBRXQbugnxEIK6Odo+fP2i48fX8b/JtkU0E7oJyyEFNCr1ZLnzaNVQQW0C/oJiYACOns2mTzdfLloqYB2oXRA9ZOBCyig6VjGBb0zF9BO6CcsBRrQ+JvJAwHtgn7CSqgBjfcoTX+ZC2jrSo9g0k+GL6CApraBxq4nk2/eCGjb9BM2AgpovBf+Tvbbb/4/AW3VRD8hJaSAxuNA7/+1+f5i8WEW0PboJ2SEFNDFkUjpXr4U0FbpJ2QFFdD527NsL6PvBbQ15Q+A109GIqyAzmfvfvqU+f7lmYC2RD8hL7CAHktAa9NP2CKglKOfsEVAKUU/YZuAUor977At8IDuPxJpUqC9aRsU/YQCAsphpeedfjIugw7oNgGtQz+hWOABnX/5+NfhO20IaA36CTuEHtCKBLQ6x2/CLgLKfvoJOwkoe+kn7BZgQGcf319eXv7+8dPhu24R0Kr0E3YLLaAfnqeGJN1/XfXXBbQi/YQ9wgpofEH4jNu/VHsAAa1GP2GfoAJ6fRZ/nu+eJ76Lv5k+PfxrKQJaifFLsFdIAY0vZTx9kbrhXdXzKQtoNfoJe4UU0KutXC6vDl+egFahn7BfQAHNXdZ44Xoy+bbK3ngBrUA/4YCAAlp03Ltj4U+n5AZQ/WTEBJRi+gkHBRTQaBV+mh+1ZBX+VPQTDgsooPOLrVrGm0XvVHkIAS1JP6GEkAL6+Swq6JvUDTdRP7cWSvcS0HL0E8oIKaDxOKaomOc/X8Z+S0bSVxrFJKAl6SeUEVRA52/PcodyTp9UewABLUU/oZSwAjqfvUondPq46hmZBLQM/YRyAgtoZPbh8tX5+fnjy9c1zmcnoCWU2wCqnxBgQI8ioIfpJ5QloOToJ5QloGTpJ5QmoGToJ5QnoKSV2gCqn5AQUNL0EyoQUFL0E6oQUFL0E6oQUDZKLIDqJ2wIKGv6CdUIKCsl9sDrJ6QJKCv6CRUJKEv6CVUJKAn9hMoElMTBgOon5AkoCf2EygSU2ME98PoJ2wSUuX5CPQLK/HBA9ROKCCiHdyDpJxQSUPQTahJQrL9DTQKKfkJNAjp6+gl1CejYHViB10/YTUDHTj+hNgEdOf2E+gR03PQTjiCg47Y3oPoJ+wnoqOknHENAx0w/4SgCOmJ7RzDpJxwkoOOln3AkAR0t/YRjCehY6SccTUBHSj/heAI6UvoJxxPQcdJPaICAjpJ+QhMEdIz2bQDVTyhNQEdIP6EZAjo++gkNEdDR0U9oioCOjX5CYwR0bPQTGiOgI6Of0BwBHRf9hAYJ6LjsDqh+QmUCOi76CQ0S0FHZuQCqn1CDgI7KroDqJ9QhoGOin9AoAR0R/YRmCeiI7AiofkJNAjoe+gkNE9Dx0E9omICORvECqH5CfQI6FvoJjRPQkSg+i51+wjEEdBz0E05AQEdBP+EUBHQU9BNOQUDHQD/hJAR0BPQTTkNAh69wA6h+wvEEdPj0E05EQIfO8iecjIAOnH7C6QjosE2KAqqf0AwBHTTLn3BKAjpo+gmnJKBDpp9wUgI6YPoJpyWgw2X/EZyYgA6WfsKpCehg6SecmoAOlX7CyQnoQOknnJ6ADtR2QPUTmiagw6Sf0AIBHSb9hBYI6CBtLYDqJ5yAgA5SPqD6CacgoIOkn9AGAR2i3AKofsJpCOgQ6Se0QkCHKBNQ/YRTEdAByqzB6yecjIAOT+Y0TPoJpyOgg6Of0JYAAzr7+P7y8vL3j59q/O5oArr8Wj/hlEIL6Ifnk437r6v++ggCqp/QmrACevNoknX7l2oPMJKALr/UTzitoAJ6fRbX4e554rv4m+nTSo8w/ICmFkD1E04spIB+fRgF80XqhndRUL/5o8pDjCmg+gmnFlJAr7ZyGSf1QZWHGHxA9RNaFFBAZ88mk/wK+/Vk8m2VvfHjCah+wukFFNBocXNrfb3otn1GEdD4X/2EFgjooKwWQPUT2hBQQKNV+Gl+1JJV+Cz9hDYFFND5xVYt482id6o8xMADulwA1U9oR0gB/XwWFfRN6oabqJ9bC6V7jSCg+gmtCSmg8TimqJjnP1/GfktG0lcaxTTwgCYLoPoJbQkqoPO3Z7lDOadPqj3ACAKqn9CasAI6n71KJ3T6uOoZmQYdUP2ElgUW0Mjsw+Wr8/Pzx5eva5zPbvAB1U9oUXgBPcqQA7pcAO16MmBEBHQw9BPaJqBDkSyAdj0VMCoCOhT6Ca0LPKD7j4WfFGhv2lo26BcH/SSgQzHoFwf9NOiAbhtuY37VT2hd4AGdf/n4V5W7DzYyxn9CB0IPaEVDDah+QhcEdAj0EzohoAOgn9CNAAM6+/j+8vLy9481DoUfZkD1EzoSWkA/PE8NSbr/uuqvDzGg+gldCSugN49yozpvVzof/SADqp/QmaACer04Gejd88TihPTT/JXi9xteQPUTuhNSQL8+jIL5InXDuyiolcbRDy+g+gkdCimgV1u5jJNa6aJIQwuofkKXAgpofA3j/Ar7yK8Lr5/QqYACWnTc+7iPhddP6JaAhks/oWMBBTRahZ/mRy2NeRVeP6FrAQV0frFVy3iz6J0qDzGggOondC6kgH4+iwr6JnXDTdTPrYXSvYYTUP2E7oUU0HgcU1TM858vY78lI+krjWIaTkD1E3ogqIDO357lDuWcPqn2AEMJqH5CH4QV0PnsVTqh08dVz8g0kIDqJ/RCYAGNzD5cvjo/P398+brG+eyGEVD9hH4IL6BHGURA9RN6QkCDo5/QFwIaGv2E3hDQwOgn9MfoAhq4qJ9dTwKw0Xijmn7AJnU9s4+ln9AvjTeq6QeklPC3TvSJudkkc7MC86ob3qRNMjebZG5WYF51w5u0SeZmk8zNCsyrbniTNsncbJK5WYF51Q1v0iaZm00yNyswr7rhTdokc7NJ5mYF5lU3vEmbZG42ydyswLzqhjdpk8zNJpmbFZhX3fAmbZK52SRzswLzqhvepE0yN5tkblZgXnXDm7RJ5maTzM0KzKtueJM2ydxskrlZgXnVDW/SJpmbTTI3KzCvuuFN2iRzs0nmZgXmVTe8SZtkbjbJ3KzAvOqGN2mTzM0mmZsVmFfd8CZtkrnZJHOzAvOqG96kTTI3m2RuVmBedcObtEnmZpPMzQrMK4CaBBSgJgEFqElAAWoSUICaBBSgJgEFqElAAWoSUICaBBSgJgEFqElAAWoSUICaBBSgJgEFqElAAWoSUICaBBSgJgEFqElAAWoSUICaBBSgJgEFqElAAWoSUICaBBSgJgEFqElAW/P14Td/FNx88/xsMpnef9P25ARs5yybPZusPe1gwoK05w3ovXmQgLYl+nAXBfTtWfJ5n/69/UkK1O5Z9vWhgFa15w3ovXmYgLZkdjEpCui1T3xVe2ZZ6kdmZznl5qaZuYuAtmOxcrkd0HiR6Xa0hvThUWFe2bZvll35qFe0Z256b5YhoK14t1gZ2n4bRp/4bz/FX8SBfdD+dAVo3yy78EmvaM/c9N4sQ0BbcBP9P3xy/9H2pzt6a05/Sb78fLZ8u7LXvlkW/cw8rGTP3PTeLEVAWxD9v3z6pGgnUrSWtHpnpt6v7LFvlkU/u9P+FIVsz9z03ixFQFtwNf3hU+Fe+OvJ5hN/YftdGftmWfSzpzc/Rkv79160P2FB2jM3vTdLEdAWfIn/T74joOuNS3aAlLJvll1Npn9b7ja+b5WzjD1z03uzFAFtS1FA02/Ma1vqy9g3yy5So5hstCtjz9z03ixFQNsioI3YM8vivcXTx5/iA2gmZmYpAnosAW2LgDZizyz7+nC9r+PK0MVSBPRYAtoWAW1EuVkWL4zaaneYgB5LQNsioI0oOcuuzM0yBPRYAtoWe+EbUXKW+ciXYi/8sQS0LcaBNqLkLBPQUowDPZaAtsWRSI0oOcssM5XiSKRjCWhbigLqeOPK9syy1HbP1A559nAs/LEEtC2FJ1R2xpvKds+y6HO+nMPxyVcdFV+GszEdSUDbUhjQxTkXXzvnYgW7Z9liIP2TT8mPLICWsucN6L1ZhoC2JR3QzRqms35XtjXL1nPz89nmRxaZytk9N703yxDQthQHdP6n685UlZ9lm7n5+dHE3Kxo99z03ixBQNuyI6CufFhdbpal5ubsXXw2u1uP/+pq0gK0e256bx4moAA1CShATQIKUJOAAtQkoAA1CShATQIKUJOAAtQkoAA1CShATQIKUJOAAtQkoAA1CShATQIKUJOAAtQkoAA1CShATQIKUJOAAtQkoAA1CShATQIKUJOAAtQkoAA1CShATQIKUJOAAtQkoAA1CShATQIKUJOAAtQkoAA1CShATQIKUJOA0rnZux/PJpPJrZ/e1H+IZ5Nv/ki+evXdZDL9YXPDjvvdvKj9ZLAioHTtbVzPxLd1E7oOY/RF7M6BgM5eTh7Un2JYElA6dj1JKYpeGeteLh/twYGARncTUI4noHTr68PJ5PaLT9FXH19Fi6Lffjru4a7KPYSA0ggBpVvp4n2OCvr06Icr8wgCSiMElG5dTKa/rL+J8nfnuIcTUNokoHQrE9BoEfTO6p+bH+O96X+tfjR7e3cymdx78WlzQ7y7/X6y2ynZthlvDkg2gaZ3y2/fb7XZ9Wn0RKvFX0mlBgGlW1cF4YoD+jnZN7+q6+fVrvrbyx31nx8l308XC5y7A1p0v3VAo29XT5AJOZQjoHQrLuNmOXN923/3bBm5JGufN0Odki6uW5ncYWdAC++3Dugm39H9jt1/xQgJKB27WtTt+59TEV3kMl7UjIeIxuv0ya76eHV8eUO0wDiZPpnPbx4l368XOFfbQFc37LjfaoV9vQ5vDZ46BJSurQfSrzdwfl6PZ4q+ipccr9e76qOUxjcs/1l/sSugu+637uXF+veswVOdgNK52btHq9Xsx+lsxi4WpUttoEzSd73eXZ8Uc1dAd91vHdDr5P7R7dbgqU5A6YUPr35MDuaMM5bdOX5nnt5Ameyoz49W2hXQXfe7Tm37XO73twZPdQJKb9w8nyRdW45mmq++3OwJWkU2v898V0B33W+zyfNiGVpr8NQgoPRIlMs4Z9mAfvsptQ++8YAu1uGtwVOPgNKpi+w6dvJtfgk0tUq/vl9TAV2sw1uDpx4BpVO5gzevVgHNbwPNnVqpsW2gyTq8NXjqEVA6tVxpX1oeGZS68WK5hp07wn2zdz1ZWj28Fz57v1RAP59N/6M1eOoRUDoVt/H2+jTKV5PVNtBl95YpjW9/s77Lg/RAp2Sc066A7rpfKqDRTf/TQ2vw1CKgdGuxg+j+60+r4aAP1re92Rx4FO+Gnz6J7vPl5fKYzOURRrOXSXIPHYmUv9916iR6V5NbZ9bgqUVA6djbzB72xYJnFNBbqx3vmRPNLw90n6ePcV98vzOgO+6X7NdPNgt8buA8zoyUgNK11fmS4iOR/p7ccja5s0zm7eW20OuzdAfnydHtm+93BnTH/ZJLJyUPFX9tDZ5aBJTufXgen+tzeu9fN8fC31l09daT9X1mr+L73HqcOkHod/Hx8+nzfM4LArrjfrN40P4PySM5kx11CSj9kxoH2gJnsqM2AaV/2g1o0SmdoRQBpX9aDei7s/wofShLQOmf9gJ6nd4vBVUJKP3TXkAXw5lsAaUuAaV/2gvo10eTyQ/6SV0CClCTgALUJKAANQkoQE0CClCTgALUJKAANQkoQE0CClCTgALUJKAANQkoQE0CClCTgALUJKAANQkoQE0CClCTgALUJKAANQkoQE0CClCTgALUJKAANQkoQE3/DaTRunBScPuzAAAAAElFTkSuQmCC" width="672" /></p>
+<pre class="r"><code>auc(data.regressio$recomanar, pred)</code></pre>
+<pre><code>## [1] 0.5554535</code></pre>
+<pre class="r"><code>#Anem a ferun regressió logistica per hotel i creant el resultat en forma de taula
+llista_hotels=unique(data.hotels_comparables$nomHotel)
+result_roc&lt;-NULL
+for (cols in llista_hotels)
+{
+  
+  data.regressio&lt;-data[data$nomHotel==cols,]
+  data.regressio$recomanar&lt;-ifelse(data.regressio$notaHotel&lt;data.regressio$notapersona,0,1)
+  
+  try(model.recomanacio&lt;-glm(recomanar~TipusHabitacio +Nits+  ProcedenciaComentari + 
+  TipusViatge  + Acompanyament+ Season , data = data.regressio),silent=T)
+  pred&lt;-predict(model.recomanacio,data.regressio,type=&quot;response&quot;)
+  area&lt;-auc(data.regressio$recomanar, pred)
+  optim_point&lt;-optim.thresh(data.regressio$recomanar,pred)$min.ROC.plot.distance
+  list.model.recomanacio&lt;-model.recomanacio
+  
+  if (is.null(result_roc))
+  {
+    result_roc&lt;-cbind(cols,area,optim_point,model.recomanacio)
+  
+  }
+  else
+  {
+    aux.merge&lt;-cbind(cols,area,optim_point,model.recomanacio)
+    result_roc&lt;-rbind(result_roc,aux.merge)
+    
+  }
+
+
+}
+
+# kable(result_roc[,c(1:3)])</code></pre>
 </div>
 
 

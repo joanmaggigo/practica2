@@ -1,7 +1,6 @@
 ---
 title: 'PRACTICA 2: LIMPIEZA Y VALIDACIÓN DE LOS DATOS'
-author: "Carles Maggi Gómez"
-tuthor: "Joan A. Maggi Gómez"
+author: "Carles Maggi Gómez - Joan A. Maggi Gómez"
 date: '`r format(Sys.Date(),"%e de %B %Y")`'
 output:
   html_document:
@@ -425,7 +424,7 @@ for (cols in llista_hotels)
 
 }
 
-kable(result_roc[,c(1:3)])
+# kable(result_roc[,c(1:3)])
 
 
 ```
