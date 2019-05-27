@@ -105,12 +105,6 @@ comentaris_per_num_categories<-categoria_per_comentari %>% group_by(total_cat) %
 kable(comentaris_per_num_categories, caption="Total Valors categories per comentaris")
 ```
 
-
-
-****
-# Neteja de dades
-****
-
 En primer lloc vam pensar en agrupar només en 5 categories, tenint en compte que el comentaris que en tenen 6 eren pocs i ens semblaven irrellevants.Finalment, ens hem adonat que això tenia efectes sobre altres comentaris perquè ens hem trobat que per un mateixa categoria en un comentari hi havia dos valors possibles, pel que el primer procés d'agrupació ha sigut erroni i hem detectat on teniem l'error. L'error  era sobre el valor "AmbMascota" que l'haviem considerat inicialment com tipus de companyia pero era un element diferenciat. 
 
 ```{r, echo=TRUE}
