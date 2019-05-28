@@ -244,17 +244,31 @@ summary(data)
 Mirarem els valors 0 de les notes mitjana d'hotel i les notes de les persons. Recordem que el valor 0 en les estrelles hem entés que significava que era un apartament i per tant no entra en el nostre estudi, ara mirem les notes mitja dels hotels i la nota de les persones.
 
 
-Eliminem els registres que sobrepassen 3 desviacions estandars de la nota de les persones.
+Eliminem els registres que sobrepassen 3 desviacions estandars  la nota donade per  les persones.Ho fem a nivell d'hotel, i no pas a nivell general, perquè entenem que si un hotel és molt dolent potser tothom el puntua amb 1 o 2, que de segur serien outliers si els considressim en la totalitat de les puntuacions de tots els hotels, pero serien valors nforça normals a la puntuació própia del hotel.
+
 
 ```{r, echo=TRUE}
-remove_outliers <- function(x, limit = 3) {
-    mn <- mean(x, na.rm = T)
-    out <- limit * sd(x, na.rm = T)
-    x < (mn - out) | x > (mn + out)
-}
-
-data<-data[remove_outliers(data$notapersona,3)==FALSE,]
 summary(data)
+dataaux<-data
+{
+  remove_outliers <- function(x, limit = 3) {
+      mn <- mean(x, na.rm = T)
+      out <- limit * sd(x, na.rm = T)
+      x < (mn - out) | x > (mn + out)
+  }
+  hotels.outliers<-unique(data$nomHotel)
+  
+  for (cols in hotels.outliers){
+     
+    un.hotel<-data[data$nomHotel==cols,]
+    
+    un.hotel<-un.hotel[remove_outliers(un.hotel$notapersona,3)==FALSE,]
+    noudata<-rbind(noudata,un.hotel)
+  }
+}
+hotels.outliers
+summary(noudata)
+data<-noudata
 ```
 ## Mirem si bloxplot de les variables numèriques 
 
