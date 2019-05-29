@@ -186,24 +186,23 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">PRACTICA 2: LIMPIEZA Y VALIDACIÓN DE LOS DATOS</h1>
 <h4 class="author"><em>Carles Maggi Gómez - Joan A. Maggi Gómez</em></h4>
-<h4 class="date"><em>27 de mayo 2019</em></h4>
+<h4 class="date"><em>29 de mayo 2019</em></h4>
 
 </div>
 
 <div id="TOC">
 <ul>
-<li><a href="#descripco-dels-dataset."><span class="toc-section-number">1</span> Descripcó dels dataset.</a></li>
-<li><a href="#neteja-de-dades"><span class="toc-section-number">2</span> Neteja de dades</a><ul>
-<li><a href="#creacio-noves-varaibles-agrupacio_categoria-id_persona"><span class="toc-section-number">2.1</span> Creació noves varaibles agrupacio_categoria, id_persona</a></li>
-<li><a href="#creacio-del-dataset-de-treball"><span class="toc-section-number">2.2</span> Creació del Dataset de treball</a></li>
+<li><a href="#descripco-dels-dataset."><span class="toc-section-number">1</span> Descripcó dels dataset.</a><ul>
+<li><a href="#creacio-noves-varaibles-agrupacio_categoria-id_persona"><span class="toc-section-number">1.1</span> Creació noves varaibles agrupacio_categoria, id_persona</a></li>
+<li><a href="#creacio-del-dataset-de-treball"><span class="toc-section-number">1.2</span> Creació del Dataset de treball</a></li>
 </ul></li>
-<li><a href="#neteja-de-dades-1"><span class="toc-section-number">3</span> Neteja de dades</a><ul>
-<li><a href="#tipus-de-dades"><span class="toc-section-number">3.1</span> Tipus de dades</a></li>
-<li><a href="#eliminaco-si-cal-de-valors-outliers-i-fringeliers"><span class="toc-section-number">3.2</span> Eliminacó si cal de valors outliers i fringeliers</a></li>
-<li><a href="#mirem-si-bloxplot-de-les-variables-numeriques"><span class="toc-section-number">3.3</span> Mirem si bloxplot de les variables numèriques</a></li>
-<li><a href="#tractament-dels-valors-na"><span class="toc-section-number">3.4</span> Tractament dels valors na</a></li>
-<li><a href="#factoritzacio-de-variables-categoriques"><span class="toc-section-number">3.5</span> Factorització de variables categòriques</a></li>
-<li><a href="#nous-atributs"><span class="toc-section-number">3.6</span> Nous atributs</a></li>
+<li><a href="#neteja-de-dades"><span class="toc-section-number">2</span> Neteja de dades</a><ul>
+<li><a href="#tipus-de-dades"><span class="toc-section-number">2.1</span> Tipus de dades</a></li>
+<li><a href="#eliminaco-si-cal-de-valors-outliers-i-fringeliers"><span class="toc-section-number">2.2</span> Eliminacó si cal de valors outliers i fringeliers</a></li>
+<li><a href="#mirem-si-bloxplot-de-les-variables-numeriques"><span class="toc-section-number">2.3</span> Mirem si bloxplot de les variables numèriques</a></li>
+<li><a href="#tractament-dels-valors-na"><span class="toc-section-number">2.4</span> Tractament dels valors na</a></li>
+<li><a href="#factoritzacio-de-variables-categoriques"><span class="toc-section-number">2.5</span> Factorització de variables categòriques</a></li>
+<li><a href="#nous-atributs"><span class="toc-section-number">2.6</span> Nous atributs</a></li>
 </ul></li>
 </ul>
 </div>
@@ -286,11 +285,6 @@ kable(comentaris_per_num_categories, caption=&quot;Total Valors categories per c
 </tr>
 </tbody>
 </table>
-<hr />
-</div>
-<div id="neteja-de-dades" class="section level1">
-<h1><span class="header-section-number">2</span> Neteja de dades</h1>
-<hr />
 <p>En primer lloc vam pensar en agrupar només en 5 categories, tenint en compte que el comentaris que en tenen 6 eren pocs i ens semblaven irrellevants.Finalment, ens hem adonat que això tenia efectes sobre altres comentaris perquè ens hem trobat que per un mateixa categoria en un comentari hi havia dos valors possibles, pel que el primer procés d’agrupació ha sigut erroni i hem detectat on teniem l’error. L’error era sobre el valor “AmbMascota” que l’haviem considerat inicialment com tipus de companyia pero era un element diferenciat.</p>
 <pre class="r"><code>idpersona_6categories&lt;-unique(categoria_per_comentari[categoria_per_comentari$total_cat==6,&quot;idPersona&quot;])
 
@@ -502,7 +496,7 @@ kable(head(hotels %&gt;% group_by(Categoria) %&gt;% summarize(total_cat=n()) %&g
 </table>
 <p>En funció de volum comencem a veure patrons per tal de poder crear l’agrupació de la categoria</p>
 <div id="creacio-noves-varaibles-agrupacio_categoria-id_persona" class="section level2">
-<h2><span class="header-section-number">2.1</span> Creació noves varaibles agrupacio_categoria, id_persona</h2>
+<h2><span class="header-section-number">1.1</span> Creació noves varaibles agrupacio_categoria, id_persona</h2>
 <pre class="r"><code>#La agrupació de categoria la inicialitzo amb la agrupació altres/darrer
 hotels$agrupacio_categoria&lt;-&quot;Acompanyament&quot;
 hotels[grep(&quot;stancia&quot;,hotels$Categoria),&quot;agrupacio_categoria&quot;]&lt;-&quot;Nits&quot;
@@ -684,7 +678,7 @@ print(head(hotels.Habitacio[which(hotels.Habitacio$ReCategoria==cols),] %&gt;% g
 <p>La recategorització sembla raonable respecte els valors observats, per tant ja podem procedir a construir el dataset de partida per evaluar els objectius descrits</p>
 </div>
 <div id="creacio-del-dataset-de-treball" class="section level2">
-<h2><span class="header-section-number">2.2</span> Creació del Dataset de treball</h2>
+<h2><span class="header-section-number">1.2</span> Creació del Dataset de treball</h2>
 <pre class="r"><code>#Anem a crear el Dataset de treball
 
 #Creem un identificador de persona
@@ -750,10 +744,10 @@ summary(data)</code></pre>
 <hr />
 </div>
 </div>
-<div id="neteja-de-dades-1" class="section level1">
-<h1><span class="header-section-number">3</span> Neteja de dades</h1>
+<div id="neteja-de-dades" class="section level1">
+<h1><span class="header-section-number">2</span> Neteja de dades</h1>
 <div id="tipus-de-dades" class="section level2">
-<h2><span class="header-section-number">3.1</span> Tipus de dades</h2>
+<h2><span class="header-section-number">2.1</span> Tipus de dades</h2>
 <p>Assignem el tipus de dades correcte, ja que les notes tenen una ‘,’ com a separador decimal i cal posar-hi un punt, i la data l’hem de passar com a tipus data.</p>
 <pre class="r"><code>#Veiem que s'ha de passar la nota del hotel a numèric
 data$notaHotel&lt;-as.numeric(gsub(&quot;,&quot;,&quot;.&quot;,data$notaHotel))
@@ -792,67 +786,202 @@ summary(data)</code></pre>
 ## </code></pre>
 </div>
 <div id="eliminaco-si-cal-de-valors-outliers-i-fringeliers" class="section level2">
-<h2><span class="header-section-number">3.2</span> Eliminacó si cal de valors outliers i fringeliers</h2>
+<h2><span class="header-section-number">2.2</span> Eliminacó si cal de valors outliers i fringeliers</h2>
 <hr />
 <p>Mirarem els valors 0 de les notes mitjana d’hotel i les notes de les persons. Recordem que el valor 0 en les estrelles hem entés que significava que era un apartament i per tant no entra en el nostre estudi, ara mirem les notes mitja dels hotels i la nota de les persones.</p>
-<p>Eliminem els registres que sobrepassen 3 desviacions estandars de la nota de les persones.</p>
-<pre class="r"><code>remove_outliers &lt;- function(x, limit = 3) {
-    mn &lt;- mean(x, na.rm = T)
-    out &lt;- limit * sd(x, na.rm = T)
-    x &lt; (mn - out) | x &gt; (mn + out)
-}
-
-data&lt;-data[remove_outliers(data$notapersona,3)==FALSE,]
-summary(data)</code></pre>
+<p>Eliminem els registres que sobrepassen 3 desviacions estandars la nota donade per les persones.Ho fem a nivell d’hotel, i no pas a nivell general, perquè entenem que si un hotel és molt dolent potser tothom el puntua amb 1 o 2, que de segur serien outliers si els considressim en la totalitat de les puntuacions de tots els hotels, pero serien valors nforça normals a la puntuació própia del hotel.</p>
+<pre class="r"><code>summary(data)</code></pre>
 <pre><code>##   idPersona           nomHotel          notapersona    
-##  Length:16083       Length:16083       Min.   : 4.200  
-##  Class :character   Class :character   1st Qu.: 7.900  
-##  Mode  :character   Mode  :character   Median : 9.000  
-##                                        Mean   : 8.624  
+##  Length:16284       Length:16284       Min.   : 2.500  
+##  Class :character   Class :character   1st Qu.: 7.500  
+##  Mode  :character   Mode  :character   Median : 8.800  
+##                                        Mean   : 8.558  
 ##                                        3rd Qu.:10.000  
 ##                                        Max.   :10.000  
-##       data              estrelles       notaHotel        num_cat     
-##  Min.   :2017-04-13   Min.   :1.000   Min.   :7.900   Min.   :2.000  
-##  1st Qu.:2017-11-26   1st Qu.:2.000   1st Qu.:8.300   1st Qu.:4.000  
-##  Median :2018-05-13   Median :3.000   Median :8.500   Median :5.000  
-##  Mean   :2018-05-06   Mean   :3.112   Mean   :8.536   Mean   :4.609  
-##  3rd Qu.:2018-11-04   3rd Qu.:4.000   3rd Qu.:8.700   3rd Qu.:5.000  
-##  Max.   :2019-04-13   Max.   :5.000   Max.   :9.400   Max.   :6.000  
+##       data              estrelles      notaHotel        num_cat     
+##  Min.   :2017-04-13   Min.   :1.00   Min.   :7.900   Min.   :2.000  
+##  1st Qu.:2017-11-25   1st Qu.:2.00   1st Qu.:8.300   1st Qu.:4.000  
+##  Median :2018-05-13   Median :3.00   Median :8.500   Median :5.000  
+##  Mean   :2018-05-06   Mean   :3.11   Mean   :8.535   Mean   :4.609  
+##  3rd Qu.:2018-11-04   3rd Qu.:4.00   3rd Qu.:8.700   3rd Qu.:5.000  
+##  Max.   :2019-04-13   Max.   :5.00   Max.   :9.400   Max.   :6.000  
 ##  TipusHabitacio         Nits           ProcedenciaComentari
-##  Length:16083       Length:16083       Length:16083        
+##  Length:16284       Length:16284       Length:16284        
 ##  Class :character   Class :character   Class :character    
 ##  Mode  :character   Mode  :character   Mode  :character    
 ##                                                            
 ##                                                            
 ##                                                            
 ##  TipusViatge        Acompanyament      ViajaConMascota   
-##  Length:16083       Length:16083       Length:16083      
+##  Length:16284       Length:16284       Length:16284      
 ##  Class :character   Class :character   Class :character  
 ##  Mode  :character   Mode  :character   Mode  :character  
 ##                                                          
 ##                                                          
 ## </code></pre>
+<pre class="r"><code>dataaux&lt;-data
+noudata &lt;- data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+{
+  remove_outliers &lt;- function(x, limit = 3) {
+      mn &lt;- mean(x, na.rm = T)
+      out &lt;- limit * sd(x, na.rm = T)
+      x &lt; (mn - out) | x &gt; (mn + out)
+  }
+  hotels.outliers&lt;-unique(data$nomHotel)
+  
+  for (cols in hotels.outliers){
+     
+    un.hotel&lt;-data[data$nomHotel==cols,]
+    
+    un.hotel&lt;-un.hotel[remove_outliers(un.hotel$notapersona,3)==FALSE,]
+    noudata&lt;-rbind(noudata,un.hotel)
+  }
+}
+hotels.outliers</code></pre>
+<pre><code>##  [1] &quot;Hostal Balkonis&quot;                       
+##  [2] &quot;Atlantis by Atbcn&quot;                     
+##  [3] &quot;Bcn Urban Hotels Gran Rosellon&quot;        
+##  [4] &quot;Hotel Àmbit Barcelona&quot;                 
+##  [5] &quot;Hotel Turin&quot;                           
+##  [6] &quot;Hotel Arts Barcelona&quot;                  
+##  [7] &quot;Hotel Casa Bonay&quot;                      
+##  [8] &quot;Upper Diagonal&quot;                        
+##  [9] &quot;Negresco Princess 4* Sup&quot;              
+## [10] &quot;Hotel El Call&quot;                         
+## [11] &quot;Hostal Fernando&quot;                       
+## [12] &quot;The Corner Hotel&quot;                      
+## [13] &quot;Hostal Central Barcelona&quot;              
+## [14] &quot;Grupotel Gran Via 678&quot;                 
+## [15] &quot;Hostal Benidorm&quot;                       
+## [16] &quot;Golden Tulip Barcelona&quot;                
+## [17] &quot;Cuatro Naciones&quot;                       
+## [18] &quot;Hotel Lloret Ramblas&quot;                  
+## [19] &quot;H10 Madison 4* Sup&quot;                    
+## [20] &quot;Hotel Rec Barcelona - Adults Only&quot;     
+## [21] &quot;Habitat Apartments Eixample Balconies.&quot;
+## [22] &quot;Hostal Q Barcelona&quot;                    
+## [23] &quot;Eurostars Ramblas&quot;                     
+## [24] &quot;Exe Plaza Catalunya&quot;                   
+## [25] &quot;Room Mate Pau&quot;                         
+## [26] &quot;Hotel Barcelona 1882&quot;                  
+## [27] &quot;Hotel Center Gran Via&quot;                 
+## [28] &quot;Catalonia Gran Via BCN&quot;                
+## [29] &quot;Catalonia Passeig de Gràcia 4* Sup&quot;    
+## [30] &quot;Hesperia Barcelona Ramblas&quot;            
+## [31] &quot;H10 Urquinaona Plaza&quot;                  
+## [32] &quot;Olivia Balmes Hotel&quot;                   
+## [33] &quot;H10 Port Vell 4* Sup&quot;                  
+## [34] &quot;Fairmont Rey Juan Carlos I&quot;            
+## [35] &quot;Hotel Ginebra&quot;                         
+## [36] &quot;Hotel Astoria&quot;                         
+## [37] &quot;Hotel Balmes&quot;                          
+## [38] &quot;HCC Taber&quot;                             
+## [39] &quot;HCC Regente&quot;                           
+## [40] &quot;Grupotel Gravina&quot;                      
+## [41] &quot;HCC Montblanc&quot;                         
+## [42] &quot;Paral·lel&quot;                             
+## [43] &quot;Acta Atrium Palace&quot;                    
+## [44] &quot;Boutique Hotel H10 Montcada&quot;           
+## [45] &quot;Melia Barcelona Sarriá&quot;                
+## [46] &quot;Acta Splendid&quot;                         
+## [47] &quot;Hotel Jazz&quot;                            
+## [48] &quot;Catalonia La Pedrera&quot;                  
+## [49] &quot;Catalonia Born&quot;                        
+## [50] &quot;Catalonia Sagrada Familia&quot;             
+## [51] &quot;NH Collection Barcelona Podium&quot;        
+## [52] &quot;Park Hotel&quot;                            
+## [53] &quot;Catalunya&quot;                             
+## [54] &quot;NH Barcelona Stadium&quot;                  
+## [55] &quot;Hesperia Barcelona Del Mar&quot;            
+## [56] &quot;Hotel Lleó&quot;                            
+## [57] &quot;Cram&quot;                                  
+## [58] &quot;Hotel Roger de Llúria&quot;                 
+## [59] &quot;Tryp Barcelona Apolo Hotel&quot;            
+## [60] &quot;Hesperia Barcelona Barri Gòtic&quot;        
+## [61] &quot;Hotel America Barcelona&quot;               
+## [62] &quot;Ciutat de Barcelona&quot;                   
+## [63] &quot;Hotel Regina&quot;                          
+## [64] &quot;Hotel Cortes&quot;                          
+## [65] &quot;Occidental Atenea Mar - Adults Only&quot;   
+## [66] &quot;Barceló Sants&quot;                         
+## [67] &quot;Pestana Arena Barcelona&quot;               
+## [68] &quot;Condes de Barcelona&quot;                   
+## [69] &quot;Hotel Villa Emilia&quot;                    
+## [70] &quot;NH Collection Barcelona Constanza&quot;     
+## [71] &quot;Acta BCN 40&quot;                           
+## [72] &quot;Pullman Barcelona Skipper&quot;             
+## [73] &quot;Ayre Hotel Gran Vía&quot;                   
+## [74] &quot;ICON BCN by Petit Palace&quot;              
+## [75] &quot;Hotel Market&quot;                          
+## [76] &quot;Hotel 54 Barceloneta&quot;                  
+## [77] &quot;Petit Palace Museum&quot;                   
+## [78] &quot;Onix Liceo&quot;                            
+## [79] &quot;Catalonia Avinyo&quot;                      
+## [80] &quot;Ciutat Vella&quot;                          
+## [81] &quot;Hilton Diagonal Mar Barcelona&quot;         
+## [82] &quot;Guest House Center Inn&quot;                
+## [83] &quot;Grand Hotel Central&quot;</code></pre>
+<pre class="r"><code>summary(noudata)</code></pre>
+<pre><code>##   idPersona           nomHotel          notapersona    
+##  Length:16091       Length:16091       Min.   : 2.500  
+##  Class :character   Class :character   1st Qu.: 7.900  
+##  Mode  :character   Mode  :character   Median : 9.000  
+##                                        Mean   : 8.617  
+##                                        3rd Qu.:10.000  
+##                                        Max.   :10.000  
+##                                        NA's   :1       
+##       data              estrelles      notaHotel        num_cat     
+##  Min.   :2017-04-13   Min.   :1.00   Min.   :8.000   Min.   :2.000  
+##  1st Qu.:2017-11-25   1st Qu.:2.00   1st Qu.:8.300   1st Qu.:4.000  
+##  Median :2018-05-13   Median :3.00   Median :8.500   Median :5.000  
+##  Mean   :2018-05-06   Mean   :3.11   Mean   :8.534   Mean   :4.608  
+##  3rd Qu.:2018-11-04   3rd Qu.:4.00   3rd Qu.:8.700   3rd Qu.:5.000  
+##  Max.   :2019-04-13   Max.   :5.00   Max.   :9.400   Max.   :6.000  
+##  NA's   :1            NA's   :1      NA's   :1       NA's   :1      
+##  TipusHabitacio         Nits           ProcedenciaComentari
+##  Length:16091       Length:16091       Length:16091        
+##  Class :character   Class :character   Class :character    
+##  Mode  :character   Mode  :character   Mode  :character    
+##                                                            
+##                                                            
+##                                                            
+##                                                            
+##  TipusViatge        Acompanyament      ViajaConMascota   
+##  Length:16091       Length:16091       Length:16091      
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+##                                                          
+## </code></pre>
+<pre class="r"><code>data&lt;-noudata</code></pre>
 </div>
 <div id="mirem-si-bloxplot-de-les-variables-numeriques" class="section level2">
-<h2><span class="header-section-number">3.3</span> Mirem si bloxplot de les variables numèriques</h2>
+<h2><span class="header-section-number">2.3</span> Mirem si bloxplot de les variables numèriques</h2>
 <pre class="r"><code>par(mfrow=c(2,2))
 for(i in 1:ncol(data)) {
   if (is.numeric(data[,i])){
     boxplot(data[,i], main = colnames(data)[i], width = 100)
   }
 }</code></pre>
-<p><img src="data:image/png;base64,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UIHx72TNTkL/KUCB8u3gUarpSWjPK5gA9tlOHuafnoQKUKB4u3me9Oyrz1ovAQUoSAkXmgAkIUABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAB3bz//V/v3Js6Zp7q++ejH94t7rd1/LxenhdMkvBmwf7EbnzJZMgI7r7HFXur1LgHavRYCSpxtmtmQCdFQ/H3am2zsE6A1rEaBk6aaZLZkAHdNN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H/HU+5AdSj1cI0i9C9mhEcZj+CoA6iRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGC/j+f5k4nuRdUvAAAAABJRU5ErkJggg==" width="672" /></p>
+<p><img src="data:image/png;base64,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6uHagdS/QvZoB+Ox/SoA6iRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAd+23/93+/dGzpmnuLr96MfniztuPX8v4/eFkyadbbB/sR+fMlkyA7tbpw650+5gA7V6LACVPV8xsyQToTv122JluHxGgV6xFgJKlq2a2ZAJ0l65Kt/4BemVGClAyVO1YCtBd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" width="672" /></p>
 <pre class="r"><code>par(mfrow=c(1,1))</code></pre>
 <pre class="r"><code>#Comencem analitzant des de la perspectiva de l'hotel.
 aux.hotels&lt;-unique(data[c(&quot;nomHotel&quot;,&quot;notaHotel&quot;,&quot;estrelles&quot;,&quot;notapersona&quot;)])
 summary(aux.hotels)</code></pre>
-<pre><code>##    nomHotel           notaHotel       estrelles     notapersona    
-##  Length:1223        Min.   :7.900   Min.   :1.00   Min.   : 4.200  
-##  Class :character   1st Qu.:8.300   1st Qu.:3.00   1st Qu.: 6.000  
-##  Mode  :character   Median :8.600   Median :4.00   Median : 7.500  
-##                     Mean   :8.575   Mean   :3.33   Mean   : 7.429  
-##                     3rd Qu.:8.800   3rd Qu.:4.00   3rd Qu.: 8.800  
-##                     Max.   :9.400   Max.   :5.00   Max.   :10.000</code></pre>
+<pre><code>##    nomHotel           notaHotel       estrelles     notapersona   
+##  Length:1209        Min.   :8.000   Min.   :1.00   Min.   : 2.50  
+##  Class :character   1st Qu.:8.300   1st Qu.:3.00   1st Qu.: 6.30  
+##  Mode  :character   Median :8.500   Median :4.00   Median : 7.50  
+##                     Mean   :8.557   Mean   :3.32   Mean   : 7.43  
+##                     3rd Qu.:8.700   3rd Qu.:4.00   3rd Qu.: 8.80  
+##                     Max.   :9.400   Max.   :5.00   Max.   :10.00  
+##                     NA's   :1       NA's   :1      NA's   :1</code></pre>
 <pre class="r"><code>#Pel que fa a les estrelles veiem que té una distribució raonable amb valors, etc.. per tant ho donem per bo
 
 #Les notes mitjes del hotel semblen raonables.
@@ -860,19 +989,19 @@ summary(aux.hotels)</code></pre>
 # Anteriorment ja hem eliminat registres que tenien la puntuacio de persona més gran que 3 vegades la desviació estandar, ja que pot ser puntual o molt  subjectiu que hagin tingut una mala experiencia puntual i estiguin resentits,  o be és un error.</code></pre>
 </div>
 <div id="tractament-dels-valors-na" class="section level2">
-<h2><span class="header-section-number">3.4</span> Tractament dels valors na</h2>
+<h2><span class="header-section-number">2.4</span> Tractament dels valors na</h2>
 <pre class="r"><code>#veiem els NA
 colSums(is.na(data))</code></pre>
 <pre><code>##            idPersona             nomHotel          notapersona 
-##                    0                    0                    0 
+##                    1                    1                    1 
 ##                 data            estrelles            notaHotel 
-##                    0                    0                    0 
+##                    1                    1                    1 
 ##              num_cat       TipusHabitacio                 Nits 
-##                    0                    5                    5 
+##                    1                    8                    8 
 ## ProcedenciaComentari          TipusViatge        Acompanyament 
-##                 4698                 1616                    0 
+##                 4702                 1621                    1 
 ##      ViajaConMascota 
-##                16052</code></pre>
+##                16060</code></pre>
 <pre class="r"><code>#Anem a pams, pel cas, ViajaConMascota, sabem que si no está informat, es raonable pensar que no viatge ambMascota. Fem una recategorització per transformar-ho en una binaria, els que tenen valors S els que no en tenen N
 
 data[!(is.na(data$ViajaConMascota)),&quot;ViajaConMascota&quot;]&lt;-&quot;S&quot;
@@ -890,20 +1019,29 @@ data[(is.na(data$Nits)) |is.na(data$TipusHabitacio),]</code></pre>
 <pre><code>##          idPersona                   nomHotel notapersona       data
 ## 1645   173142_3_40              Hotel El Call         9.6 2018-01-02
 ## 3215  2311290_4_22     Golden Tulip Barcelona        10.0 2017-07-30
+## NA            &lt;NA&gt;                       &lt;NA&gt;          NA       &lt;NA&gt;
 ## 7849    90480_2_15     Melia Barcelona Sarriá         8.8 2018-08-08
+## 7878    90480_2_41     Melia Barcelona Sarriá         2.5 2018-04-17
 ## 10336   91120_2_24 Hesperia Barcelona Del Mar         9.6 2018-08-29
+## 10892   91493_1_46 Tryp Barcelona Apolo Hotel         3.3 2019-02-22
 ## 14135   93879_1_14  Pullman Barcelona Skipper        10.0 2019-02-13
 ##       estrelles notaHotel num_cat TipusHabitacio Nits ProcedenciaComentari
 ## 1645          1       8.3       3           &lt;NA&gt; &lt;NA&gt;      Enviadopormóvil
 ## 3215          4       8.7       2           &lt;NA&gt; &lt;NA&gt;        EnviadoporWeb
+## NA           NA        NA      NA           &lt;NA&gt; &lt;NA&gt;        EnviadoporWeb
 ## 7849          5       8.2       3           &lt;NA&gt; &lt;NA&gt;      Enviadopormóvil
+## 7878          5       8.2       3           &lt;NA&gt; &lt;NA&gt;      Enviadopormóvil
 ## 10336         4       8.2       2           &lt;NA&gt; &lt;NA&gt;        EnviadoporWeb
+## 10892         4       8.6       3           &lt;NA&gt; &lt;NA&gt;      Enviadopormóvil
 ## 14135         5       8.5       2           &lt;NA&gt; &lt;NA&gt;        EnviadoporWeb
 ##           TipusViatge           Acompanyament ViajaConMascota
 ## 1645      Viajedeocio                  Pareja               N
 ## 3215      Viajedeocio Familiaconniñospequeños               N
+## NA      SenseInformar                    &lt;NA&gt;               N
 ## 7849      Viajedeocio Familiaconniñospequeños               N
+## 7878  Viajedenegocios     Personaqueviajasola               N
 ## 10336     Viajedeocio                   Grupo               N
+## 10892 Viajedenegocios     Personaqueviajasola               N
 ## 14135 Viajedenegocios     Personaqueviajasola               N</code></pre>
 <pre class="r"><code>#Veiem que si per tant, sembla raonable pensar que és un error i que milor obviar la informació (eliminarla)
 data&lt;-data[!(is.na(data$Nits)) &amp; !(is.na(data$TipusHabitacio)),]
@@ -912,28 +1050,28 @@ data&lt;-data[!(is.na(data$Nits)) &amp; !(is.na(data$TipusHabitacio)),]
 
 summary(data)</code></pre>
 <pre><code>##   idPersona           nomHotel          notapersona    
-##  Length:16078       Length:16078       Min.   : 4.200  
+##  Length:16083       Length:16083       Min.   : 2.500  
 ##  Class :character   Class :character   1st Qu.: 7.900  
 ##  Mode  :character   Mode  :character   Median : 9.000  
-##                                        Mean   : 8.624  
+##                                        Mean   : 8.617  
 ##                                        3rd Qu.:10.000  
 ##                                        Max.   :10.000  
-##       data              estrelles       notaHotel        num_cat     
-##  Min.   :2017-04-13   Min.   :1.000   Min.   :7.900   Min.   :3.000  
-##  1st Qu.:2017-11-26   1st Qu.:2.000   1st Qu.:8.300   1st Qu.:4.000  
-##  Median :2018-05-13   Median :3.000   Median :8.500   Median :5.000  
-##  Mean   :2018-05-06   Mean   :3.112   Mean   :8.536   Mean   :4.609  
-##  3rd Qu.:2018-11-04   3rd Qu.:4.000   3rd Qu.:8.700   3rd Qu.:5.000  
-##  Max.   :2019-04-13   Max.   :5.000   Max.   :9.400   Max.   :6.000  
+##       data              estrelles      notaHotel        num_cat     
+##  Min.   :2017-04-13   Min.   :1.00   Min.   :8.000   Min.   :3.000  
+##  1st Qu.:2017-11-25   1st Qu.:2.00   1st Qu.:8.300   1st Qu.:4.000  
+##  Median :2018-05-13   Median :3.00   Median :8.500   Median :5.000  
+##  Mean   :2018-05-06   Mean   :3.11   Mean   :8.534   Mean   :4.609  
+##  3rd Qu.:2018-11-04   3rd Qu.:4.00   3rd Qu.:8.700   3rd Qu.:5.000  
+##  Max.   :2019-04-13   Max.   :5.00   Max.   :9.400   Max.   :6.000  
 ##  TipusHabitacio         Nits           ProcedenciaComentari
-##  Length:16078       Length:16078       Length:16078        
+##  Length:16083       Length:16083       Length:16083        
 ##  Class :character   Class :character   Class :character    
 ##  Mode  :character   Mode  :character   Mode  :character    
 ##                                                            
 ##                                                            
 ##                                                            
 ##  TipusViatge        Acompanyament      ViajaConMascota   
-##  Length:16078       Length:16078       Length:16078      
+##  Length:16083       Length:16083       Length:16083      
 ##  Class :character   Class :character   Class :character  
 ##  Mode  :character   Mode  :character   Mode  :character  
 ##                                                          
@@ -941,7 +1079,7 @@ summary(data)</code></pre>
 ## </code></pre>
 </div>
 <div id="factoritzacio-de-variables-categoriques" class="section level2">
-<h2><span class="header-section-number">3.5</span> Factorització de variables categòriques</h2>
+<h2><span class="header-section-number">2.5</span> Factorització de variables categòriques</h2>
 <pre class="r"><code>#Anem a transformar les variables categóriques as.factor
 data$ViajaConMascota&lt;-as.factor(data$ViajaConMascota)
 data$Acompanyament&lt;-as.factor(data$Acompanyament)
@@ -956,50 +1094,50 @@ data$estrelles&lt;-ordered(data$estrelles,levels=c(&quot;1&quot;,&quot;2&quot;,&
 data$nomHotel&lt;-as.factor(data$nomHotel)
 summary(data)</code></pre>
 <pre><code>##   idPersona                                      nomHotel    
-##  Length:16078       Catalonia Sagrada Familia        :  900  
-##  Class :character   Hotel Lloret Ramblas             :  821  
-##  Mode  :character   Ayre Hotel Gran Vía              :  787  
-##                     Barceló Sants                    :  630  
+##  Length:16083       Catalonia Sagrada Familia        :  911  
+##  Class :character   Hotel Lloret Ramblas             :  834  
+##  Mode  :character   Ayre Hotel Gran Vía              :  775  
+##                     Barceló Sants                    :  627  
 ##                     Hotel Cortes                     :  540  
-##                     NH Collection Barcelona Constanza:  466  
-##                     (Other)                          :11934  
+##                     NH Collection Barcelona Constanza:  463  
+##                     (Other)                          :11933  
 ##   notapersona          data            estrelles   notaHotel    
-##  Min.   : 4.200   Min.   :2017-04-13   1:1355    Min.   :7.900  
-##  1st Qu.: 7.900   1st Qu.:2017-11-26   2:3065    1st Qu.:8.300  
-##  Median : 9.000   Median :2018-05-13   3:4403    Median :8.500  
-##  Mean   : 8.624   Mean   :2018-05-06   4:6930    Mean   :8.536  
-##  3rd Qu.:10.000   3rd Qu.:2018-11-04   5: 325    3rd Qu.:8.700  
+##  Min.   : 2.500   Min.   :2017-04-13   1:1364    Min.   :8.000  
+##  1st Qu.: 7.900   1st Qu.:2017-11-25   2:3068    1st Qu.:8.300  
+##  Median : 9.000   Median :2018-05-13   3:4415    Median :8.500  
+##  Mean   : 8.617   Mean   :2018-05-06   4:6906    Mean   :8.534  
+##  3rd Qu.:10.000   3rd Qu.:2018-11-04   5: 330    3rd Qu.:8.700  
 ##  Max.   :10.000   Max.   :2019-04-13             Max.   :9.400  
 ##                                                                 
 ##     num_cat                   TipusHabitacio                 Nits     
-##  Min.   :3.000   Altres              : 1167   Estanciade1noche :6062  
-##  1st Qu.:4.000   Habitacio Doble     :12506   Estanciade2noches:4153  
-##  Median :5.000   Habitacio Individual: 1408   Estanciade3noches:3039  
-##  Mean   :4.609   Habitacio quadruple :  200   Estanciade4noches:1655  
-##  3rd Qu.:5.000   Habitacio Triple    :  679   Estanciade5noches: 640  
-##  Max.   :6.000   Suite               :  118   Estanciade6noches: 285  
-##                                               (Other)          : 244  
+##  Min.   :3.000   Altres              : 1166   Estanciade1noche :6071  
+##  1st Qu.:4.000   Habitacio Doble     :12511   Estanciade2noches:4146  
+##  Median :5.000   Habitacio Individual: 1411   Estanciade3noches:3044  
+##  Mean   :4.609   Habitacio quadruple :  199   Estanciade4noches:1654  
+##  3rd Qu.:5.000   Habitacio Triple    :  678   Estanciade5noches: 640  
+##  Max.   :6.000   Suite               :  118   Estanciade6noches: 286  
+##                                               (Other)          : 242  
 ##       ProcedenciaComentari          TipusViatge   
-##  Enviadopormóvil:11383     SenseInformar  : 1616  
-##  EnviadoporWeb  : 4695     Viajedenegocios: 2061  
-##                            Viajedeocio    :12401  
+##  Enviadopormóvil:11385     SenseInformar  : 1620  
+##  EnviadoporWeb  : 4698     Viajedenegocios: 2066  
+##                            Viajedeocio    :12397  
 ##                                                   
 ##                                                   
 ##                                                   
 ##                                                   
 ##                  Acompanyament  ViajaConMascota
-##  Familiaconniñosmayores :   2   N:16047        
-##  Familiaconniñospequeños:2966   S:   31        
-##  Grupo                  :1707                  
+##  Familiaconniñosmayores :   2   N:16052        
+##  Familiaconniñospequeños:2961   S:   31        
+##  Grupo                  :1711                  
 ##  Grupodeamigos          : 419                  
-##  Pareja                 :7775                  
+##  Pareja                 :7781                  
 ##  Personaqueviajasola    :3209                  
 ## </code></pre>
 <pre class="r"><code>#Ens adonem que acompanyament te un factor que es 'Familia con niños mayores' i 'Familia con ninos pequeños', i el grup de 'Familia con niños mayores' es força petit, pel que agrupem els dos nivells a 'Familiaconniños'
 levels(data$Acompanyament) &lt;- c(&quot;Familiaconniños&quot;,&quot;Familiaconniños&quot;,&quot;Grupo&quot;,&quot;Grupodeamigos&quot;,&quot;Pareja&quot;,&quot;Personaqueviajasola&quot;)</code></pre>
 </div>
 <div id="nous-atributs" class="section level2">
-<h2><span class="header-section-number">3.6</span> Nous atributs</h2>
+<h2><span class="header-section-number">2.6</span> Nous atributs</h2>
 <p>Ens decidim ara a fer les primeres hipotesis, i la primera és que volem saber si les notes que es donen en el primer trimestre de l’any son diferents a les que es donen a l’estiu</p>
 <p>Per això, caldrà, que afegim una variable nova, que determini l’epoca de l’any en funció de la data del comentari (pot haver-hi un decalatge de dies, però assumin que els comentaris es fan aprop de la data en la que s’ha gaudit l’estancia de l’hotel)</p>
 <pre class="r"><code>data$Season&lt;-&quot;PRIMER TRIMESTRE&quot;
@@ -1009,42 +1147,42 @@ data[month(data$data)&gt;=10 &amp; month(data$data)&lt;=12,&quot;Season&quot; ]&
 data$Season&lt;-as.factor(data$Season)
 summary(data)</code></pre>
 <pre><code>##   idPersona                                      nomHotel    
-##  Length:16078       Catalonia Sagrada Familia        :  900  
-##  Class :character   Hotel Lloret Ramblas             :  821  
-##  Mode  :character   Ayre Hotel Gran Vía              :  787  
-##                     Barceló Sants                    :  630  
+##  Length:16083       Catalonia Sagrada Familia        :  911  
+##  Class :character   Hotel Lloret Ramblas             :  834  
+##  Mode  :character   Ayre Hotel Gran Vía              :  775  
+##                     Barceló Sants                    :  627  
 ##                     Hotel Cortes                     :  540  
-##                     NH Collection Barcelona Constanza:  466  
-##                     (Other)                          :11934  
+##                     NH Collection Barcelona Constanza:  463  
+##                     (Other)                          :11933  
 ##   notapersona          data            estrelles   notaHotel    
-##  Min.   : 4.200   Min.   :2017-04-13   1:1355    Min.   :7.900  
-##  1st Qu.: 7.900   1st Qu.:2017-11-26   2:3065    1st Qu.:8.300  
-##  Median : 9.000   Median :2018-05-13   3:4403    Median :8.500  
-##  Mean   : 8.624   Mean   :2018-05-06   4:6930    Mean   :8.536  
-##  3rd Qu.:10.000   3rd Qu.:2018-11-04   5: 325    3rd Qu.:8.700  
+##  Min.   : 2.500   Min.   :2017-04-13   1:1364    Min.   :8.000  
+##  1st Qu.: 7.900   1st Qu.:2017-11-25   2:3068    1st Qu.:8.300  
+##  Median : 9.000   Median :2018-05-13   3:4415    Median :8.500  
+##  Mean   : 8.617   Mean   :2018-05-06   4:6906    Mean   :8.534  
+##  3rd Qu.:10.000   3rd Qu.:2018-11-04   5: 330    3rd Qu.:8.700  
 ##  Max.   :10.000   Max.   :2019-04-13             Max.   :9.400  
 ##                                                                 
 ##     num_cat                   TipusHabitacio                 Nits     
-##  Min.   :3.000   Altres              : 1167   Estanciade1noche :6062  
-##  1st Qu.:4.000   Habitacio Doble     :12506   Estanciade2noches:4153  
-##  Median :5.000   Habitacio Individual: 1408   Estanciade3noches:3039  
-##  Mean   :4.609   Habitacio quadruple :  200   Estanciade4noches:1655  
-##  3rd Qu.:5.000   Habitacio Triple    :  679   Estanciade5noches: 640  
-##  Max.   :6.000   Suite               :  118   Estanciade6noches: 285  
-##                                               (Other)          : 244  
+##  Min.   :3.000   Altres              : 1166   Estanciade1noche :6071  
+##  1st Qu.:4.000   Habitacio Doble     :12511   Estanciade2noches:4146  
+##  Median :5.000   Habitacio Individual: 1411   Estanciade3noches:3044  
+##  Mean   :4.609   Habitacio quadruple :  199   Estanciade4noches:1654  
+##  3rd Qu.:5.000   Habitacio Triple    :  678   Estanciade5noches: 640  
+##  Max.   :6.000   Suite               :  118   Estanciade6noches: 286  
+##                                               (Other)          : 242  
 ##       ProcedenciaComentari          TipusViatge   
-##  Enviadopormóvil:11383     SenseInformar  : 1616  
-##  EnviadoporWeb  : 4695     Viajedenegocios: 2061  
-##                            Viajedeocio    :12401  
+##  Enviadopormóvil:11385     SenseInformar  : 1620  
+##  EnviadoporWeb  : 4698     Viajedenegocios: 2066  
+##                            Viajedeocio    :12397  
 ##                                                   
 ##                                                   
 ##                                                   
 ##                                                   
 ##              Acompanyament  ViajaConMascota              Season    
-##  Familiaconniños    :2968   N:16047         PRIMER TRIMESTRE:4425  
-##  Grupo              :1707   S:   31         QUART TRIMESTRE :4078  
-##  Grupodeamigos      : 419                   SEGON TRIMESTRE :3774  
-##  Pareja             :7775                   TERCER TRIMESTRE:3801  
+##  Familiaconniños    :2963   N:16052         PRIMER TRIMESTRE:4428  
+##  Grupo              :1711   S:   31         QUART TRIMESTRE :4079  
+##  Grupodeamigos      : 419                   SEGON TRIMESTRE :3770  
+##  Pareja             :7781                   TERCER TRIMESTRE:3806  
 ##  Personaqueviajasola:3209                                          
 ##                                                                    
 ## </code></pre>
@@ -1052,9 +1190,9 @@ summary(data)</code></pre>
 hotels_1er_3er&lt;-data %&gt;% filter(Season=='PRIMER TRIMESTRE' | Season=='TERCER TRIMESTRE')
 aov.hotels_1er_3er=aov(notapersona~Season,hotels_1er_3er)
 summary(aov.hotels_1er_3er)</code></pre>
-<pre><code>##               Df Sum Sq Mean Sq F value  Pr(&gt;F)    
-## Season         1    118  117.78   62.44 3.1e-15 ***
-## Residuals   8224  15512    1.89                    
+<pre><code>##               Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## Season         1    120  119.55   61.21 5.77e-15 ***
+## Residuals   8232  16078    1.95                     
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <pre class="r"><code>kable(hotels_1er_3er%&gt;% group_by(Season) %&gt;% summarise(n=n(),mean=mean(notapersona),sd=sd(notapersona)))</code></pre>
@@ -1070,15 +1208,15 @@ summary(aov.hotels_1er_3er)</code></pre>
 <tbody>
 <tr class="odd">
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">4425</td>
-<td align="right">8.743186</td>
-<td align="right">1.325180</td>
+<td align="right">4428</td>
+<td align="right">8.733695</td>
+<td align="right">1.349286</td>
 </tr>
 <tr class="even">
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">3801</td>
-<td align="right">8.503183</td>
-<td align="right">1.427478</td>
+<td align="right">3806</td>
+<td align="right">8.492013</td>
+<td align="right">1.451689</td>
 </tr>
 </tbody>
 </table>
@@ -1141,17 +1279,17 @@ kable(result_aov)</code></pre>
 <tr class="odd">
 <td align="left">Atlantis by Atbcn</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">71</td>
-<td align="right">8.764789</td>
-<td align="right">1.2919640</td>
+<td align="right">69</td>
+<td align="right">8.879710</td>
+<td align="right">1.1141575</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">79</td>
-<td align="right">8.749367</td>
-<td align="right">1.0414331</td>
+<td align="right">78</td>
+<td align="right">8.797436</td>
+<td align="right">0.9559077</td>
 <td align="left">Atlantis by Atbcn</td>
-<td align="right">0.9356843</td>
+<td align="right">0.6306356</td>
 <td align="left">FALSE</td>
-<td align="right">0.0154216</td>
+<td align="right">0.0822742</td>
 </tr>
 <tr class="even">
 <td align="left">Bcn Urban Hotels Gran Rosellon</td>
@@ -1201,17 +1339,17 @@ kable(result_aov)</code></pre>
 <tr class="odd">
 <td align="left">Grupotel Gran Via 678</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">95</td>
-<td align="right">8.835790</td>
-<td align="right">1.2127791</td>
+<td align="right">94</td>
+<td align="right">8.880851</td>
+<td align="right">1.1365177</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">40</td>
-<td align="right">8.795000</td>
-<td align="right">1.3707475</td>
+<td align="right">39</td>
+<td align="right">8.902564</td>
+<td align="right">1.2055763</td>
 <td align="left">Grupotel Gran Via 678</td>
-<td align="right">0.8640165</td>
+<td align="right">0.9216623</td>
 <td align="left">FALSE</td>
-<td align="right">0.0407895</td>
+<td align="right">-0.0217130</td>
 </tr>
 <tr class="even">
 <td align="left">Hostal Benidorm</td>
@@ -1235,43 +1373,43 @@ kable(result_aov)</code></pre>
 <td align="right">8.832558</td>
 <td align="right">1.1844524</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">64</td>
-<td align="right">8.662500</td>
-<td align="right">1.5344199</td>
+<td align="right">61</td>
+<td align="right">8.868852</td>
+<td align="right">1.2437230</td>
 <td align="left">Golden Tulip Barcelona</td>
-<td align="right">0.4448259</td>
+<td align="right">0.8579625</td>
 <td align="left">FALSE</td>
-<td align="right">0.1700581</td>
+<td align="right">-0.0362943</td>
 </tr>
 <tr class="even">
 <td align="left">Cuatro Naciones</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">55</td>
-<td align="right">8.620000</td>
-<td align="right">1.2490589</td>
+<td align="right">54</td>
+<td align="right">8.701852</td>
+<td align="right">1.1018836</td>
 <td align="left">TERCER TRIMESTRE</td>
 <td align="right">109</td>
 <td align="right">8.848624</td>
 <td align="right">1.1813845</td>
 <td align="left">Cuatro Naciones</td>
-<td align="right">0.2527762</td>
+<td align="right">0.4465321</td>
 <td align="left">FALSE</td>
-<td align="right">-0.2286239</td>
+<td align="right">-0.1467720</td>
 </tr>
 <tr class="odd">
 <td align="left">Hotel Lloret Ramblas</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">182</td>
-<td align="right">8.396154</td>
-<td align="right">1.3799418</td>
+<td align="right">187</td>
+<td align="right">8.270588</td>
+<td align="right">1.5592048</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">212</td>
-<td align="right">8.170755</td>
-<td align="right">1.5018136</td>
+<td align="right">216</td>
+<td align="right">8.087500</td>
+<td align="right">1.6073035</td>
 <td align="left">Hotel Lloret Ramblas</td>
-<td align="right">0.1239584</td>
+<td align="right">0.2482383</td>
 <td align="left">FALSE</td>
-<td align="right">0.2253991</td>
+<td align="right">0.1830882</td>
 </tr>
 <tr class="even">
 <td align="left">Hostal Q Barcelona</td>
@@ -1280,13 +1418,13 @@ kable(result_aov)</code></pre>
 <td align="right">8.707692</td>
 <td align="right">1.4447805</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">96</td>
-<td align="right">8.283333</td>
-<td align="right">1.3634065</td>
+<td align="right">98</td>
+<td align="right">8.191837</td>
+<td align="right">1.4921564</td>
 <td align="left">Hostal Q Barcelona</td>
-<td align="right">0.0788068</td>
-<td align="left">FALSE</td>
-<td align="right">0.4243590</td>
+<td align="right">0.0434232</td>
+<td align="left">TRUE</td>
+<td align="right">0.5158556</td>
 </tr>
 <tr class="odd">
 <td align="left">Room Mate Pau</td>
@@ -1304,66 +1442,51 @@ kable(result_aov)</code></pre>
 <td align="right">0.1396429</td>
 </tr>
 <tr class="even">
-<td align="left">Catalonia Gran Via BCN</td>
-<td align="left">PRIMER TRIMESTRE</td>
-<td align="right">46</td>
-<td align="right">8.908696</td>
-<td align="right">1.2699652</td>
-<td align="left">TERCER TRIMESTRE</td>
-<td align="right">31</td>
-<td align="right">8.274194</td>
-<td align="right">1.5543418</td>
-<td align="left">Catalonia Gran Via BCN</td>
-<td align="right">0.0533062</td>
-<td align="left">FALSE</td>
-<td align="right">0.6345021</td>
-</tr>
-<tr class="odd">
 <td align="left">Hotel Ginebra</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">50</td>
 <td align="right">8.696000</td>
 <td align="right">1.4356908</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">46</td>
-<td align="right">8.608696</td>
-<td align="right">1.5481639</td>
+<td align="right">45</td>
+<td align="right">8.706667</td>
+<td align="right">1.4141171</td>
 <td align="left">Hotel Ginebra</td>
-<td align="right">0.7749845</td>
+<td align="right">0.9710293</td>
 <td align="left">FALSE</td>
-<td align="right">0.0873043</td>
+<td align="right">-0.0106667</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Hotel Astoria</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">55</td>
 <td align="right">8.752727</td>
 <td align="right">1.1783313</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">36</td>
-<td align="right">8.797222</td>
-<td align="right">1.4835259</td>
+<td align="right">35</td>
+<td align="right">8.917143</td>
+<td align="right">1.3162973</td>
 <td align="left">Hotel Astoria</td>
-<td align="right">0.8741760</td>
+<td align="right">0.5391781</td>
 <td align="left">FALSE</td>
-<td align="right">-0.0444949</td>
+<td align="right">-0.1644156</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Grupotel Gravina</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">98</td>
 <td align="right">8.921429</td>
 <td align="right">1.2136042</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">80</td>
-<td align="right">8.183750</td>
-<td align="right">1.5551013</td>
+<td align="right">83</td>
+<td align="right">8.025301</td>
+<td align="right">1.7342211</td>
 <td align="left">Grupotel Gravina</td>
-<td align="right">0.0004867</td>
+<td align="right">0.0000697</td>
 <td align="left">TRUE</td>
-<td align="right">0.7376786</td>
+<td align="right">0.8961274</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Acta Atrium Palace</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">53</td>
@@ -1378,22 +1501,22 @@ kable(result_aov)</code></pre>
 <td align="left">FALSE</td>
 <td align="right">-0.2321265</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Acta Splendid</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">51</td>
 <td align="right">8.629412</td>
 <td align="right">1.2392408</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">53</td>
-<td align="right">8.133962</td>
-<td align="right">1.7364800</td>
+<td align="right">54</td>
+<td align="right">8.053704</td>
+<td align="right">1.8183253</td>
 <td align="left">Acta Splendid</td>
-<td align="right">0.0981633</td>
+<td align="right">0.0622607</td>
 <td align="left">FALSE</td>
-<td align="right">0.4954495</td>
+<td align="right">0.5757081</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Catalonia La Pedrera</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">61</td>
@@ -1408,67 +1531,67 @@ kable(result_aov)</code></pre>
 <td align="left">FALSE</td>
 <td align="right">0.0246184</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Catalonia Born</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">38</td>
-<td align="right">8.678947</td>
-<td align="right">1.3590851</td>
+<td align="right">37</td>
+<td align="right">8.789189</td>
+<td align="right">1.1932178</td>
 <td align="left">TERCER TRIMESTRE</td>
 <td align="right">45</td>
 <td align="right">9.002222</td>
 <td align="right">1.3344200</td>
 <td align="left">Catalonia Born</td>
-<td align="right">0.2787888</td>
+<td align="right">0.4529497</td>
 <td align="left">FALSE</td>
-<td align="right">-0.3232749</td>
-</tr>
-<tr class="even">
-<td align="left">Catalonia Sagrada Familia</td>
-<td align="left">PRIMER TRIMESTRE</td>
-<td align="right">288</td>
-<td align="right">8.541319</td>
-<td align="right">1.4359718</td>
-<td align="left">TERCER TRIMESTRE</td>
-<td align="right">187</td>
-<td align="right">8.129412</td>
-<td align="right">1.6288201</td>
-<td align="left">Catalonia Sagrada Familia</td>
-<td align="right">0.0039600</td>
-<td align="left">TRUE</td>
-<td align="right">0.4119077</td>
+<td align="right">-0.2130330</td>
 </tr>
 <tr class="odd">
+<td align="left">Catalonia Sagrada Familia</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">293</td>
+<td align="right">8.456997</td>
+<td align="right">1.5616313</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">188</td>
+<td align="right">8.106383</td>
+<td align="right">1.6548621</td>
+<td align="left">Catalonia Sagrada Familia</td>
+<td align="right">0.0193328</td>
+<td align="left">TRUE</td>
+<td align="right">0.3506136</td>
+</tr>
+<tr class="even">
 <td align="left">Catalunya</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">77</td>
-<td align="right">8.174026</td>
-<td align="right">1.5466775</td>
+<td align="right">81</td>
+<td align="right">7.945679</td>
+<td align="right">1.8143904</td>
 <td align="left">TERCER TRIMESTRE</td>
 <td align="right">78</td>
 <td align="right">7.852564</td>
 <td align="right">1.4815510</td>
 <td align="left">Catalunya</td>
-<td align="right">0.1883164</td>
+<td align="right">0.7240415</td>
 <td align="left">FALSE</td>
-<td align="right">0.3214619</td>
+<td align="right">0.0931149</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">NH Barcelona Stadium</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">85</td>
-<td align="right">8.268235</td>
-<td align="right">1.4302191</td>
+<td align="right">87</td>
+<td align="right">8.159770</td>
+<td align="right">1.5827897</td>
 <td align="left">TERCER TRIMESTRE</td>
 <td align="right">64</td>
 <td align="right">8.031250</td>
 <td align="right">1.5652856</td>
 <td align="left">NH Barcelona Stadium</td>
-<td align="right">0.3379826</td>
+<td align="right">0.6210621</td>
 <td align="left">FALSE</td>
-<td align="right">0.2369853</td>
+<td align="right">0.1285201</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Hotel Lleó</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">48</td>
@@ -1483,22 +1606,22 @@ kable(result_aov)</code></pre>
 <td align="left">FALSE</td>
 <td align="right">-0.2392628</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Hesperia Barcelona Barri Gòtic</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">40</td>
-<td align="right">8.800000</td>
-<td align="right">1.2362059</td>
+<td align="right">41</td>
+<td align="right">8.678049</td>
+<td align="right">1.4490535</td>
 <td align="left">TERCER TRIMESTRE</td>
 <td align="right">36</td>
 <td align="right">8.002778</td>
 <td align="right">1.7208779</td>
 <td align="left">Hesperia Barcelona Barri Gòtic</td>
-<td align="right">0.0221818</td>
-<td align="left">TRUE</td>
-<td align="right">0.7972222</td>
+<td align="right">0.0655062</td>
+<td align="left">FALSE</td>
+<td align="right">0.6752710</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Ciutat de Barcelona</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">75</td>
@@ -1513,7 +1636,7 @@ kable(result_aov)</code></pre>
 <td align="left">FALSE</td>
 <td align="right">0.1969009</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Hotel Regina</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">45</td>
@@ -1528,7 +1651,7 @@ kable(result_aov)</code></pre>
 <td align="left">TRUE</td>
 <td align="right">0.6424837</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Hotel Cortes</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">109</td>
@@ -1543,7 +1666,7 @@ kable(result_aov)</code></pre>
 <td align="left">FALSE</td>
 <td align="right">0.1654801</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Occidental Atenea Mar - Adults Only</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">36</td>
@@ -1558,22 +1681,22 @@ kable(result_aov)</code></pre>
 <td align="left">FALSE</td>
 <td align="right">0.7657895</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Barceló Sants</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">101</td>
-<td align="right">8.747525</td>
-<td align="right">1.2336607</td>
+<td align="right">100</td>
+<td align="right">8.793000</td>
+<td align="right">1.1516571</td>
 <td align="left">TERCER TRIMESTRE</td>
 <td align="right">214</td>
 <td align="right">8.575701</td>
 <td align="right">1.3571816</td>
 <td align="left">Barceló Sants</td>
-<td align="right">0.2813773</td>
+<td align="right">0.1671281</td>
 <td align="left">FALSE</td>
-<td align="right">0.1718238</td>
+<td align="right">0.2172991</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Pestana Arena Barcelona</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">53</td>
@@ -1588,82 +1711,82 @@ kable(result_aov)</code></pre>
 <td align="left">FALSE</td>
 <td align="right">-0.3040497</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Condes de Barcelona</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">67</td>
 <td align="right">9.056716</td>
 <td align="right">1.1118131</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">78</td>
-<td align="right">8.800000</td>
-<td align="right">1.3957263</td>
+<td align="right">76</td>
+<td align="right">8.918421</td>
+<td align="right">1.2022990</td>
 <td align="left">Condes de Barcelona</td>
-<td align="right">0.2278679</td>
+<td align="right">0.4783109</td>
 <td align="left">FALSE</td>
-<td align="right">0.2567164</td>
-</tr>
-<tr class="even">
-<td align="left">NH Collection Barcelona Constanza</td>
-<td align="left">PRIMER TRIMESTRE</td>
-<td align="right">138</td>
-<td align="right">9.173913</td>
-<td align="right">0.9637445</td>
-<td align="left">TERCER TRIMESTRE</td>
-<td align="right">135</td>
-<td align="right">9.048889</td>
-<td align="right">1.1101208</td>
-<td align="left">NH Collection Barcelona Constanza</td>
-<td align="right">0.3209528</td>
-<td align="left">FALSE</td>
-<td align="right">0.1250242</td>
+<td align="right">0.1382954</td>
 </tr>
 <tr class="odd">
+<td align="left">NH Collection Barcelona Constanza</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">137</td>
+<td align="right">9.210219</td>
+<td align="right">0.8674069</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">134</td>
+<td align="right">9.076119</td>
+<td align="right">1.0680725</td>
+<td align="left">NH Collection Barcelona Constanza</td>
+<td align="right">0.2570832</td>
+<td align="left">FALSE</td>
+<td align="right">0.1340996</td>
+</tr>
+<tr class="even">
 <td align="left">Acta BCN 40</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">44</td>
 <td align="right">8.372727</td>
 <td align="right">1.3074676</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">38</td>
-<td align="right">8.405263</td>
-<td align="right">1.3367867</td>
+<td align="right">39</td>
+<td align="right">8.274359</td>
+<td align="right">1.5518610</td>
 <td align="left">Acta BCN 40</td>
-<td align="right">0.9117301</td>
+<td align="right">0.7548109</td>
 <td align="left">FALSE</td>
-<td align="right">-0.0325359</td>
-</tr>
-<tr class="even">
-<td align="left">Ayre Hotel Gran Vía</td>
-<td align="left">PRIMER TRIMESTRE</td>
-<td align="right">247</td>
-<td align="right">8.907287</td>
-<td align="right">1.2603182</td>
-<td align="left">TERCER TRIMESTRE</td>
-<td align="right">163</td>
-<td align="right">8.876687</td>
-<td align="right">1.2229074</td>
-<td align="left">Ayre Hotel Gran Vía</td>
-<td align="right">0.8077841</td>
-<td align="left">FALSE</td>
-<td align="right">0.0306003</td>
+<td align="right">0.0983683</td>
 </tr>
 <tr class="odd">
-<td align="left">Hotel Market</td>
+<td align="left">Ayre Hotel Gran Vía</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">118</td>
-<td align="right">8.012712</td>
-<td align="right">1.4985775</td>
+<td align="right">244</td>
+<td align="right">8.961885</td>
+<td align="right">1.1661119</td>
 <td align="left">TERCER TRIMESTRE</td>
-<td align="right">85</td>
-<td align="right">8.030588</td>
-<td align="right">1.4830008</td>
-<td align="left">Hotel Market</td>
-<td align="right">0.9329696</td>
+<td align="right">160</td>
+<td align="right">8.956875</td>
+<td align="right">1.0817306</td>
+<td align="left">Ayre Hotel Gran Vía</td>
+<td align="right">0.9653631</td>
 <td align="left">FALSE</td>
-<td align="right">-0.0178764</td>
+<td align="right">0.0050102</td>
 </tr>
 <tr class="even">
+<td align="left">Hotel Market</td>
+<td align="left">PRIMER TRIMESTRE</td>
+<td align="right">119</td>
+<td align="right">7.973109</td>
+<td align="right">1.5534924</td>
+<td align="left">TERCER TRIMESTRE</td>
+<td align="right">88</td>
+<td align="right">7.877273</td>
+<td align="right">1.6728891</td>
+<td align="left">Hotel Market</td>
+<td align="right">0.6715462</td>
+<td align="left">FALSE</td>
+<td align="right">0.0958365</td>
+</tr>
+<tr class="odd">
 <td align="left">Petit Palace Museum</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">51</td>
@@ -1678,22 +1801,22 @@ kable(result_aov)</code></pre>
 <td align="left">FALSE</td>
 <td align="right">0.2739170</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Catalonia Avinyo</td>
 <td align="left">PRIMER TRIMESTRE</td>
-<td align="right">39</td>
-<td align="right">8.784615</td>
-<td align="right">1.5567406</td>
+<td align="right">38</td>
+<td align="right">8.905263</td>
+<td align="right">1.3805497</td>
 <td align="left">TERCER TRIMESTRE</td>
 <td align="right">40</td>
 <td align="right">9.042500</td>
 <td align="right">1.2518474</td>
 <td align="left">Catalonia Avinyo</td>
-<td align="right">0.4190580</td>
+<td align="right">0.6465981</td>
 <td align="left">FALSE</td>
-<td align="right">-0.2578846</td>
+<td align="right">-0.1372368</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Ciutat Vella</td>
 <td align="left">PRIMER TRIMESTRE</td>
 <td align="right">47</td>
@@ -1720,38 +1843,38 @@ summary(model.hotel.nota)</code></pre>
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -4.6799 -0.8908  0.3694  1.1637  2.1558 
+## -6.3423 -0.8859  0.3741  1.1682  2.2003 
 ## 
 ## Coefficients:
 ##                                     Estimate Std. Error t value Pr(&gt;|t|)
-## (Intercept)                         8.805458   0.058396 150.788  &lt; 2e-16
-## TipusHabitacioHabitacio Doble       0.026491   0.042572   0.622 0.533777
-## TipusHabitacioHabitacio Individual -0.219384   0.060466  -3.628 0.000286
-## TipusHabitacioHabitacio quadruple   0.167898   0.105373   1.593 0.111097
-## TipusHabitacioHabitacio Triple      0.075392   0.066515   1.133 0.257041
-## TipusHabitacioSuite                 0.297036   0.132392   2.244 0.024871
-## NitsEstanciade2noches              -0.044060   0.027666  -1.593 0.111280
-## NitsEstanciade3noches               0.035657   0.030738   1.160 0.246051
-## NitsEstanciade4noches              -0.016888   0.038282  -0.441 0.659120
-## NitsEstanciade5noches               0.010925   0.056978   0.192 0.847942
-## NitsEstanciade6noches               0.003566   0.082883   0.043 0.965686
-## NitsEstanciade7noches               0.168665   0.119740   1.409 0.158976
-## NitsMesde7                          0.228940   0.130849   1.750 0.080198
-## ProcedenciaComentariEnviadoporWeb  -0.100366   0.024059  -4.172 3.04e-05
-## TipusViatgeViajedenegocios         -0.294212   0.046748  -6.294 3.18e-10
-## TipusViatgeViajedeocio              0.038761   0.036577   1.060 0.289285
-## AcompanyamentGrupo                 -0.031843   0.042621  -0.747 0.455008
-## AcompanyamentGrupodeamigos          0.135334   0.071836   1.884 0.059592
-## AcompanyamentPareja                -0.044593   0.031752  -1.404 0.160208
-## AcompanyamentPersonaqueviajasola   -0.017199   0.042967  -0.400 0.688942
-## SeasonQUART TRIMESTRE              -0.031218   0.029672  -1.052 0.292762
-## SeasonSEGON TRIMESTRE              -0.228048   0.030409  -7.499 6.75e-14
-## SeasonTERCER TRIMESTRE             -0.271359   0.030451  -8.911  &lt; 2e-16
+## (Intercept)                         8.792116   0.059170 148.590  &lt; 2e-16
+## TipusHabitacioHabitacio Doble       0.025870   0.043130   0.600 0.548640
+## TipusHabitacioHabitacio Individual -0.233941   0.061204  -3.822 0.000133
+## TipusHabitacioHabitacio quadruple   0.189064   0.106979   1.767 0.077196
+## TipusHabitacioHabitacio Triple      0.082383   0.067426   1.222 0.221795
+## TipusHabitacioSuite                 0.307168   0.134113   2.290 0.022013
+## NitsEstanciade2noches              -0.031861   0.028032  -1.137 0.255725
+## NitsEstanciade3noches               0.032869   0.031114   1.056 0.290792
+## NitsEstanciade4noches              -0.010501   0.038778  -0.271 0.786552
+## NitsEstanciade5noches               0.017327   0.057717   0.300 0.764018
+## NitsEstanciade6noches              -0.002793   0.083816  -0.033 0.973420
+## NitsEstanciade7noches               0.180331   0.121293   1.487 0.137102
+## NitsMesde7                          0.320379   0.133748   2.395 0.016614
+## ProcedenciaComentariEnviadoporWeb  -0.098422   0.024368  -4.039 5.40e-05
+## TipusViatgeViajedenegocios         -0.301196   0.047317  -6.366 2.00e-10
+## TipusViatgeViajedeocio              0.051187   0.037006   1.383 0.166616
+## AcompanyamentGrupo                 -0.051617   0.043156  -1.196 0.231698
+## AcompanyamentGrupodeamigos          0.132669   0.072773   1.823 0.068315
+## AcompanyamentPareja                -0.056432   0.032162  -1.755 0.079342
+## AcompanyamentPersonaqueviajasola   -0.016479   0.043529  -0.379 0.705011
+## SeasonQUART TRIMESTRE              -0.026826   0.030048  -0.893 0.371995
+## SeasonSEGON TRIMESTRE              -0.218786   0.030808  -7.102 1.28e-12
+## SeasonTERCER TRIMESTRE             -0.275367   0.030831  -8.932  &lt; 2e-16
 ##                                       
 ## (Intercept)                        ***
 ## TipusHabitacioHabitacio Doble         
 ## TipusHabitacioHabitacio Individual ***
-## TipusHabitacioHabitacio quadruple     
+## TipusHabitacioHabitacio quadruple  .  
 ## TipusHabitacioHabitacio Triple        
 ## TipusHabitacioSuite                *  
 ## NitsEstanciade2noches                 
@@ -1760,13 +1883,13 @@ summary(model.hotel.nota)</code></pre>
 ## NitsEstanciade5noches                 
 ## NitsEstanciade6noches                 
 ## NitsEstanciade7noches                 
-## NitsMesde7                         .  
+## NitsMesde7                         *  
 ## ProcedenciaComentariEnviadoporWeb  ***
 ## TipusViatgeViajedenegocios         ***
 ## TipusViatgeViajedeocio                
 ## AcompanyamentGrupo                    
 ## AcompanyamentGrupodeamigos         .  
-## AcompanyamentPareja                   
+## AcompanyamentPareja                .  
 ## AcompanyamentPersonaqueviajasola      
 ## SeasonQUART TRIMESTRE                 
 ## SeasonSEGON TRIMESTRE              ***
@@ -1774,9 +1897,9 @@ summary(model.hotel.nota)</code></pre>
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## Residual standard error: 1.364 on 16055 degrees of freedom
-## Multiple R-squared:  0.01997,    Adjusted R-squared:  0.01863 
-## F-statistic: 14.87 on 22 and 16055 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Residual standard error: 1.382 on 16060 degrees of freedom
+## Multiple R-squared:  0.02056,    Adjusted R-squared:  0.01922 
+## F-statistic: 15.32 on 22 and 16060 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>En termes generals la nota no es pot explicar a través d’aquestes dades perqué el valor d’R^2 é smolt baix, pel que no som capaços d’explicar tota la variabilitat, és a dir, ens falten informació (regressors) que ajudin a predir el comportament.</p>
 <p>Anem a plantejar una altra estrategia, en aquest cas determinem que una persona recomana un hotel X si la nota que ha posat (notapersona) és superior a la nota mitjana de l’hotel (notaHOtel), per fer això, crearem una variable binària (Recomana amb valors S/N i mirarem de treballar amb una regressió logística)</p>
 <pre class="r"><code>data.regressio&lt;-data
@@ -1792,30 +1915,30 @@ summary(model.recomanancio)</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.6279  -0.4048  -0.3751   0.5795   0.7253  
+## -0.6316  -0.4052  -0.3748   0.5787   0.7273  
 ## 
 ## Coefficients:
 ##                                     Estimate Std. Error t value Pr(&gt;|t|)
-## (Intercept)                         0.384649   0.020143  19.096  &lt; 2e-16
-## TipusHabitacioHabitacio Doble      -0.013264   0.015294  -0.867  0.38581
-## TipusHabitacioHabitacio Individual  0.060032   0.021721   2.764  0.00572
-## TipusHabitacioHabitacio quadruple  -0.082841   0.037856  -2.188  0.02866
-## TipusHabitacioHabitacio Triple     -0.031910   0.023897  -1.335  0.18180
-## TipusHabitacioSuite                -0.095643   0.047564  -2.011  0.04436
-## NitsEstanciade2noches               0.026400   0.009937   2.657  0.00790
-## NitsEstanciade3noches               0.012801   0.011029   1.161  0.24579
-## NitsEstanciade4noches               0.029037   0.013718   2.117  0.03430
-## NitsEstanciade5noches               0.023791   0.020443   1.164  0.24454
-## NitsEstanciade6noches               0.010217   0.029771   0.343  0.73146
-## NitsEstanciade7noches              -0.073921   0.043011  -1.719  0.08570
-## NitsMesde7                         -0.046292   0.046995  -0.985  0.32461
-## ProcedenciaComentariEnviadoporWeb   0.043143   0.008638   4.994 5.96e-07
-## TipusViatgeViajedenegocios          0.099002   0.016788   5.897 3.77e-09
-## TipusViatgeViajedeocio             -0.007654   0.013129  -0.583  0.55990
-## AcompanyamentGrupo                  0.014662   0.015305   0.958  0.33808
-## AcompanyamentGrupodeamigos         -0.033387   0.025810  -1.294  0.19583
-## AcompanyamentPareja                 0.013670   0.011394   1.200  0.23026
-## AcompanyamentPersonaqueviajasola   -0.006631   0.015423  -0.430  0.66723
+## (Intercept)                         0.386068   0.020145  19.165  &lt; 2e-16
+## TipusHabitacioHabitacio Doble      -0.013403   0.015295  -0.876  0.38091
+## TipusHabitacioHabitacio Individual  0.061891   0.021704   2.852  0.00436
+## TipusHabitacioHabitacio quadruple  -0.085846   0.037939  -2.263  0.02366
+## TipusHabitacioHabitacio Triple     -0.032829   0.023913  -1.373  0.16982
+## TipusHabitacioSuite                -0.096451   0.047563  -2.028  0.04259
+## NitsEstanciade2noches               0.024696   0.009939   2.485  0.01297
+## NitsEstanciade3noches               0.012925   0.011020   1.173  0.24087
+## NitsEstanciade4noches               0.027951   0.013718   2.038  0.04162
+## NitsEstanciade5noches               0.023099   0.020442   1.130  0.25850
+## NitsEstanciade6noches               0.011496   0.029719   0.387  0.69889
+## NitsEstanciade7noches              -0.074902   0.043009  -1.742  0.08160
+## NitsMesde7                         -0.058071   0.047418  -1.225  0.22073
+## ProcedenciaComentariEnviadoporWeb   0.043057   0.008637   4.985 6.26e-07
+## TipusViatgeViajedenegocios          0.098732   0.016774   5.886 4.04e-09
+## TipusViatgeViajedeocio             -0.009329   0.013113  -0.711  0.47682
+## AcompanyamentGrupo                  0.017118   0.015298   1.119  0.26317
+## AcompanyamentGrupodeamigos         -0.032539   0.025811  -1.261  0.20744
+## AcompanyamentPareja                 0.014937   0.011393   1.311  0.18986
+## AcompanyamentPersonaqueviajasola   -0.007257   0.015424  -0.471  0.63800
 ##                                       
 ## (Intercept)                        ***
 ## TipusHabitacioHabitacio Doble         
@@ -1823,7 +1946,7 @@ summary(model.recomanancio)</code></pre>
 ## TipusHabitacioHabitacio quadruple  *  
 ## TipusHabitacioHabitacio Triple        
 ## TipusHabitacioSuite                *  
-## NitsEstanciade2noches              ** 
+## NitsEstanciade2noches              *  
 ## NitsEstanciade3noches                 
 ## NitsEstanciade4noches              *  
 ## NitsEstanciade5noches                 
@@ -1840,19 +1963,19 @@ summary(model.recomanancio)</code></pre>
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## (Dispersion parameter for gaussian family taken to be 0.2403512)
+## (Dispersion parameter for gaussian family taken to be 0.2403366)
 ## 
-##     Null deviance: 3901.4  on 16077  degrees of freedom
-## Residual deviance: 3859.6  on 16058  degrees of freedom
-## AIC: 22728
+##     Null deviance: 3903.3  on 16082  degrees of freedom
+## Residual deviance: 3860.5  on 16063  degrees of freedom
+## AIC: 22734
 ## 
 ## Number of Fisher Scoring iterations: 2</code></pre>
 <pre class="r"><code>pred=predict(model.recomanancio,data.regressio,type=&quot;response&quot;)
 corba&lt;-roc(data.regressio$recomanar,pred)
 graf=plot(corba,print.thres=&quot;best&quot;, print.thres.best.method=&quot;closest.topleft&quot;, main=&quot; Corvesa ROC. - Llindar óptim&quot;)</code></pre>
-<p><img src="data:image/png;base64,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" width="672" /></p>
+<p><img src="data:image/png;base64,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" width="672" /></p>
 <pre class="r"><code>auc(data.regressio$recomanar, pred)</code></pre>
-<pre><code>## [1] 0.5565852</code></pre>
+<pre><code>## [1] 0.5567048</code></pre>
 <pre class="r"><code>#Anem a ferun regressió logistica per hotel i creant el resultat en forma de taula
 llista_hotels=unique(data.hotels_comparables$nomHotel)
 result_roc&lt;-NULL
@@ -1862,8 +1985,7 @@ for (cols in llista_hotels)
   data.regressio&lt;-data[data$nomHotel==cols,]
   data.regressio$recomanar&lt;-ifelse(data.regressio$notaHotel&lt;data.regressio$notapersona,0,1)
   
-  try(model.recomanacio&lt;-glm(recomanar~TipusHabitacio +Nits+  ProcedenciaComentari + 
-  TipusViatge  + Acompanyament+ Season , data = data.regressio),silent=T)
+  try(model.recomanacio&lt;-glm(recomanar~TipusHabitacio+Nits+ProcedenciaComentari+TipusViatge+Acompanyament+Season , data = data.regressio),silent=T)
   pred&lt;-predict(model.recomanacio,data.regressio,type=&quot;response&quot;)
   area&lt;-auc(data.regressio$recomanar, pred)
   optim_point&lt;-optim.thresh(data.regressio$recomanar,pred)$min.ROC.plot.distance
