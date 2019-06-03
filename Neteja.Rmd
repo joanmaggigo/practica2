@@ -431,7 +431,22 @@ summary(data)
 ```{r}
 #Anem a veure si la diferencia en general de les notes de les persones pels hotels difereix entre el primer trimestre i el tercer trimetre. Per això, apliquem un anova.
 
-z.test(data[data$Season=="PRIMER TRIMESTRE","notapersona"],data[data$Season=="TERCER TRIMESTRE","notapersona"])
+fligner.test(notapersona ~ Season, data = data)
+
+wilcox.test(notapersona ~ Season, data = data, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+
+
+llistat_estrelles<-levels(data$estrelles)
+for(cols in llistat_estrelles)
+{
+  aux<-data[which(data$estrelles==cols),]
+  
+  print(shapiro.test(sample(aux$notapersona,min(nrow(aux),5000))))
+  print(fligner.test(notapersona ~ Season, data = aux))
+  print(wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE")))
+
+}
+
 
 hotels_1er_3er<-data %>% filter(Season=='PRIMER TRIMESTRE' | Season=='TERCER TRIMESTRE')
 aov.hotels_1er_3er=aov(notapersona~Season,hotels_1er_3er)
