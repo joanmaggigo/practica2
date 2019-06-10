@@ -2,11 +2,7 @@
 title: 'PRACTICA 2: LIMPIEZA Y VALIDACIÓN DE LOS DATOS'
 author: "Carles Maggi Gómez - Joan A. Maggi Gómez"
 date: '`r format(Sys.Date(),"%e de %B %Y")`'
-output:
-  html_document:
-    toc: yes
-    number_sections: yes
-    toc_depth: 2
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +12,8 @@ if (!require("knitr")){
 knitr::opts_chunk$set(echo = TRUE)
 Encoding = "UTF-8"
 ```
+
+
 
 ```{r  Carregem les llibreries si ens calen, include=FALSE}
 if (!require("rmarkdown")){
@@ -42,6 +40,8 @@ library(dplyr)
 library(pROC)
 library(SDMTools)
 
+options(digits = 2)
+
 ```
 
 Partim de tres fitxers de la primera parts de la pràctica que cal unificar en un sol per poder ser tratats.
@@ -67,9 +67,9 @@ colnames(categories)<-c("idHotel","idIteracio","index","Categoria")
 
 ```
 
-***
-# Descripcó dels dataset.
-***
+
+# Descripció dels dataset.
+
 Podem trobar el datasets en el següent repositori :
 
 https://github.com/joanmaggigo/practica2/CSV
@@ -259,7 +259,7 @@ summary(data)
 
 ```
 
-****
+
 # Neteja de dades
 ## Tipus de dades
 
@@ -281,43 +281,6 @@ data$notapersona<-as.numeric(gsub(",",".",data$notapersona))
 data$data<-as.Date(data$data)
 summary(data)
 
-```
-## Eliminacó  si cal de valors  outliers i fringeliers
-****
-Mirarem els valors 0 de les notes mitjana d'hotel i les notes de les persones. Recordem que el valor 0 en les estrelles hem entés que significava que era un apartament i per tant no entra en el nostre estudi, ara mirem les notes mitja dels hotels i la nota de les persones.
-
-
-Eliminem els registres que sobrepassen 3 desviacions estandars  la nota donada per  les persones.Ho fem a nivell d'hotel, i no pas a nivell general, perquè entenem que si un hotel és molt dolent potser tothom el puntua amb 1 o 2, que de segur serien outliers si els considressim en la totalitat de les puntuacions de tots els hotels, pero serien valors força normals a la puntuació própia del hotel.
-
-
-```{r, echo=TRUE}
-summary(data)
-dataaux<-data
-noudata <- data.frame(Doubles=double(),
-                 Ints=integer(),
-                 Factors=factor(),
-                 Logicals=logical(),
-                 Characters=character(),
-                 stringsAsFactors=FALSE)
-{
-  remove_outliers <- function(x, limit = 3) {
-      mn <- mean(x, na.rm = T)
-      out <- limit * sd(x, na.rm = T)
-      x < (mn - out) | x > (mn + out)
-  }
-  hotels.outliers<-unique(data$nomHotel)
-  
-  for (cols in hotels.outliers){
-     
-    un.hotel<-data[data$nomHotel==cols,]
-    
-    un.hotel<-un.hotel[remove_outliers(un.hotel$notapersona,3)==FALSE,]
-    noudata<-rbind(noudata,un.hotel)
-  }
-}
-hotels.outliers
-summary(noudata)
-data<-noudata
 ```
 
 
@@ -364,6 +327,55 @@ data<-data[!(is.na(data$Nits)) & !(is.na(data$TipusHabitacio)),]
 summary(data)
 ```
 
+## Eliminacó  si cal de valors  outliers i fringeliers
+****
+Mirarem els valors 0 de les notes mitjana d'hotel i les notes de les persones. Recordem que el valor 0 en les estrelles hem entés que significava que era un apartament i per tant no entra en el nostre estudi, ara mirem les notes mitja dels hotels i la nota de les persones.
+
+
+Eliminem els registres que sobrepassen 3 desviacions estandars  la nota donada per  les persones.Ho fem a nivell d'hotel, i no pas a nivell general, perquè entenem que si un hotel és molt dolent potser tothom el puntua amb 1 o 2, que de segur serien outliers si els considressim en la totalitat de les puntuacions de tots els hotels, pero serien valors força normals a la puntuació própia del hotel.
+
+
+```{r, echo=TRUE}
+dataaux<-data
+noudata <-NULL
+{
+  remove_outliers <- function(x, limit = 3) {
+      mn <- mean(x, na.rm = T)
+      out <- limit * sd(x, na.rm = T)
+      x < (mn - out) | x > (mn + out)
+  }
+  hotels.outliers<-unique(data$nomHotel)
+  
+  for (cols in hotels.outliers){
+     
+    un.hotel<-data[data$nomHotel==cols,]
+    if (NROW(un.hotel)>1) {
+    un.hotel<-un.hotel[remove_outliers(un.hotel$notapersona,3)==FALSE,]
+    }
+  
+    if (is.null(noudata) )
+    {  noudata<-un.hotel}
+    else
+    {
+    noudata<-rbind(noudata,un.hotel)
+    }
+  }
+}
+
+summary(noudata)
+data<-noudata
+
+#ANEm a mirar la distribució del nombre de nits
+boxplot(data$Nits)
+outlier_superior<-IQR(data$Nits)*1.5+quantile(data$Nits)[4]
+#Anem si les estàncies llargues es concentren en uns hotels específics o no.
+kable(head(data %>% filter(Nits>outlier_superior)  %>% group_by(nomHotel) %>% summarize(total_hot=n()),10),caption="Holtes amb duració llarga")
+
+
+```
+
+Sembla que si que hi hagi uns hotels on el nombre de dies és més elevat, però no veiem cap disbarat en el nombre de nits, per tant, considerem que són valors vàlids i que no hem de fer cap tractament.
+
 ## Factorització de variables categòriques
 
 ```{r}
@@ -401,15 +413,17 @@ for(i in 1:ncol(data)) {
 }
 par(mfrow=c(1,1))
 ```
+
+La visualització dels gràfics no ens mostra normalitat en les dades, però per acabar-ho de concreta, aplicarem els test (no ho fem sobre notaHotel perquè pensem que no es pot estudiar en aquest dataset)
 Per acabar de comprobar, anem aplicar el test de Shapiro
+
 ```{r}
 set.seed(1000)
 shapiro.test(sample(data$notapersona,5000))
 shapiro.test(sample(data$Nits,5000))
-
-
-
 ```
+
+Amb ambdos casos rebutjem la hipotésis nul·la i per tant no podem assumir normalitat, tal ic om haviem vist amb les gràfiques.
 
 ## Nous atributs
 
@@ -427,14 +441,19 @@ summary(data)
 
 ```
 
+Anem a veure si la diferencia en general de les notes de les persones pels hotels difereix entre el primer trimestre i el tercer trimetre. Per això,estudiarem la normalitat i la homocestadicitat de la nota. En un primer moment pel conjunt de la mostra i poc a poc anirem diferentciant pel conjunt de categoritzacions que aporten les dades
+
+
+Amb tot això ja sabem que la nota persona no segueixen una distribució normal ni hi ha homocedasticitat entre els grups separats per season. Per tant, com que no es compleix, el que farem es aplicar un test parametric Mann-Whitney
 
 ```{r echo=TRUE}
-#Anem a veure si la diferencia en general de les notes de les persones pels hotels difereix entre el primer trimestre i el tercer trimetre. Per això,estudiarem la normalitat i la homocestadicitat de la nota. En un primer moment pel conjunt de la mostra i poc a poc anirem diferentciant pel conjunt de categoritzacions que aporten les dades
-
-
-#Amb tot això ja sabem que la nota persona no segueixen una distribució normal ni hi ha homocedasticitat entre els rups separats per season. Per tant, com que no es compleix, el que farem es aplicar un test parametric Mann-Whitney
+fligner.test(notapersona ~ Season, data = data)
+#No hi hahomocedasticitat aplqieum una prova no paramètica (wolcox.test)
 wilcox.test(notapersona ~ Season, data = data, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
 
+#Creem un dataset per treure resultats resumits
+hotels_1er_3er<-data[which(data$Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE")),]
+#Visualitzem mitjanes
 kable(hotels_1er_3er%>% group_by(Season) %>% summarise(n=n(),mean=mean(notapersona),sd=sd(notapersona)))
 
 ```
@@ -459,14 +478,14 @@ for(cols in llistat_estrelles)
   sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
   homo<-  fligner.test(notapersona ~ Season, data = aux)
 
-  test<-"Parametric"
+  test<-"No Parametric"
   if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
     {
       #tenim homocedasticitat
         test<-"Student"
     }
     
-  if (test=='Parametric') 
+  if (test=='No Parametric') 
   {
       test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
@@ -474,16 +493,18 @@ for(cols in llistat_estrelles)
   {
     test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
-  actual<-cbind(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]))
-  colnames(actual)<-c("Estrelles","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre")
+
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]), NROW(aux))
+  colnames(actual)<-c("Estrelles","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre","Nombre Comentaris")
   #Construim la taula de resultats
   resultat.estrelles<-rbind(resultat.estrelles,actual)
   
 }
 
-kable(resultat.estrelles)
+kable(resultat.estrelles,caption="Resum notes per estrelles")
 ```
-Veient els resultat, veiem que en el cas de les estrelles, són els d'una estrella i els de cinc que no hi ha diferències entre les notes mitjanes pero si entre els de 2 a 4 estrelles.
+
+Veient els resultat, veiem que en el cas de les estrelles, són els de cinc que no hi ha diferències entre les notes mitjanes pero si entre els de 1 a 4 estrelles.
 
 Ara volem comprovar per tipus d'habitació
 
@@ -505,14 +526,14 @@ for(cols in llistat)
   sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
   homo<-  fligner.test(notapersona ~ Season, data = aux)
 
-  test<-"Parametric"
+  test<-"No Parametric"
   if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
     {
       #tenim homocedasticitat
         test<-"Student"
     }
     
-  if (test=='Parametric') 
+  if (test=='No Parametric') 
   {
       test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
@@ -520,14 +541,14 @@ for(cols in llistat)
   {
     test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
-  actual<-cbind(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]))
-  colnames(actual)<-c("Tipus Habitacio","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre")
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]), NROW(aux))
+  colnames(actual)<-c("Tipus Habitacio","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre", "Nombre Comentaris")
   #Construim la taula de resultats
   resultat<-rbind(resultat,actual)
   
 }
 
-kable(resultat)
+kable(resultat, caption="REsum per Tipus Habitació")
 ```
 
 En el cas de tipus d'habitació, només veiem diferencia en els que han demanat una habitació quadruple i habitació doble.
@@ -552,14 +573,14 @@ for(cols in llistat)
   sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
   homo<-  fligner.test(notapersona ~ Season, data = aux)
 
-  test<-"Parametric"
+  test<-"No Parametric"
   if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
     {
       #tenim homocedasticitat
         test<-"Student"
     }
     
-  if (test=='Parametric') 
+  if (test=='No Parametric') 
   {
       test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
@@ -567,14 +588,14 @@ for(cols in llistat)
   {
     test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
-  actual<-cbind(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]))
-  colnames(actual)<-c("Durada Estancia","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre")
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]),NROW(aux))
+  colnames(actual)<-c("Durada Estancia","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre","Nombre Comentaris")
   #Construim la taula de resultats
   resultat<-rbind(resultat,actual)
   
 }
 
-kable(resultat)
+kable(resultat, caption="Resum per durada Estancia")
 ```
 
 En aquest cas veiem que com més llarga és l'estancia menys diferencia hi ha entre les notes d'estiu i d'hivern. A partir de 6 nits no hi ha evidència de diferencia de nota entre estiu i hivern.
@@ -598,14 +619,14 @@ for(cols in llistat)
   sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
   homo<-  fligner.test(notapersona ~ Season, data = aux)
 
-  test<-"Parametric"
+  test<-"No Parametric"
   if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
     {
       #tenim homocedasticitat
         test<-"Student"
     }
     
-  if (test=='Parametric') 
+  if (test=='No Parametric') 
   {
       test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
@@ -613,15 +634,16 @@ for(cols in llistat)
   {
     test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
-  actual<-cbind(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]))
-  colnames(actual)<-c("Acompanyament","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre")
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]), NROW(aux))
+  colnames(actual)<-c("Acompanyament","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre","Nombre Comentaris")
   #Construim la taula de resultats
   resultat<-rbind(resultat,actual)
   
 }
 
-kable(resultat)
+kable(resultat, caption="Resum per Acompanyament")
 ```
+
 Només els que viatgem amb amics sembla que no percebin una diferencia entre la nota que posen a l'estiu i a l'hivern.
 
 
@@ -643,14 +665,14 @@ for(cols in llistat)
   sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
   homo<-  fligner.test(notapersona ~ Season, data = aux)
 
-  test<-"Parametric"
+  test<-"No Parametric"
   if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
     {
       #tenim homocedasticitat
         test<-"Student"
     }
     
-  if (test=='Parametric') 
+  if (test=='No Parametric') 
   {
       test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
@@ -658,18 +680,18 @@ for(cols in llistat)
   {
     test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
   }
-  actual<-cbind(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]))
-  colnames(actual)<-c("TipusViatge","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre")
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]), NROW(aux))
+  colnames(actual)<-c("TipusViatge","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre","Nombre Comentaris")
   #Construim la taula de resultats
   resultat<-rbind(resultat,actual)
   
 }
 
-kable(resultat)
+kable(resultat, caption="Resum per TipusViatge")
 
 ```
-Per tipus de viatge, es percep que hi ha diferencia entre la nota que es posa a l'estiu respecte la nota que es posa a l'hiven.
 
+Per tipus de viatge, es percep que hi ha diferencia entre la nota que es posa a l'estiu respecte la nota que es posa a l'hiven.
 
 Ara, ens proposem crear un algoritme que ens digui en funció de les categoriques quin és el millor hotel per nosaltres. Ens plantejem fer el següent.
 Crearem una regressió lineal per predicció de nota per cada hotel. Comprovarem el grau de significancia de la regressió. Un cop fet això, si veiem que podem prossegguir, aplicarem la regressió per cada hotel i obtindrem la llista d'hotels ordenat per nota ascendent, per donar-te la confiança i el grau de confiança de la recomenació (1-p_value de la regressió)
@@ -677,7 +699,7 @@ Crearem una regressió lineal per predicció de nota per cada hotel. Comprovarem
 
 ```{r}
 
-model.hotel.nota<-lm(notapersona~TipusHabitacio+Nits+ProcedenciaComentari+TipusViatge+Acompanyament+Season, data)
+model.hotel.nota<-lm(notapersona~TipusHabitacio+Nits+TipusViatge+Acompanyament+Season, data)
 summary(model.hotel.nota)
 
 
@@ -687,40 +709,153 @@ En termes generals la nota no es pot explicar a través d'aquestes dades perqué
 Anem a plantejar una altra estrategia, en aquest cas determinem que una persona recomana un hotel X si la nota que ha posat (notapersona) és superior a la nota mitjana de l'hotel (notaHOtel), per fer això, crearem una variable binària (Recomana amb valors S/N i mirarem de treballar amb una regressió logística). Mirarem de recomenar un hotel en funció de les variables explicatives.
 
 ```{r}
+#Creem la nova variable
+data$recomanar<-ifelse(data$notaHotel<data$notapersona,0,1)
+#Validem que hi hagi sempre més d'un cas
+hotel.excloure<-data %>% group_by(nomHotel,recomanar) %>% group_by(nomHotel) %>% summarise(n=n_distinct(recomanar)) %>% filter(n<2)
+
+#excloem els que no tenen més d'un cas
+data<-data[which(!(data$nomHotel %in%  hotel.excloure$nomHotel)),]
+
+#Mirem en termes generals els resultats de recomanació sense entrar hotel per hotel
+model.recomanacio<-glm(recomanar~TipusHabitacio+Nits+TipusViatge+Acompanyament+Season , data = data)
+summary(model.recomanacio)
+pred<-predict(model.recomanacio,data,type="response")
+corba<-roc(data$recomanar,pred)
+plot(corba,print.thres="best", print.thres.best.method="closest.topleft", main=" Corvesa ROC. - Llindar óptim")
+area<-auc(data$recomanar, pred)
+optim_point<-optim.thresh(data$recomanar,pred)$min.ROC.plot.distance[1]
+
+
+# Creo vector amb les predccions segons el llibdar demanat.
+prediccions <- ifelse(test = model.recomanacio$fitted.values >= optim_point, 
+                      yes = 1, no = 0)
+#Creem la matriu de confusió
+matriu_confusio<- addmargins(table(data$recomanar, prediccions,
+                                   dnn = c("observacions", "prediccions")))
+
+#Matriu de confusio
+matriu_confusio
+
+```
+
+El model es força dolent, el punt òptim seria determinar 0.422 com a valor a partir del qual acceptem els possius. La matriu de confusions ens dona un % d'encert molt dolent.
+Assumint un valor de  confiança 0.05 només són significatives, el tipus d'habitació individu, la quadruple i la suite.
+Pel tipus de viatge el de negocis. Acompanyament no és significatiu i el segon i el tercer Trimestre són significatius.
+
+Assumint el que hem dit, el model ens diu que per recomanar o no un hotel comencem per una puntuació de 0.37. Tots els tipus d'habitació resten a excepció de l'habitació Individual i Altres. Les nits, resten 0.001 per cada nit. Els que viatge per negocis puntuene millor pels que els d'oci resten. Per grups resta la nota quan qui viatge es un grup d'amics i tant acompanyament com Quart Segon Tercer trimestre sumen a la nota.
+
+Això, és un exercici per ajudar a entedre que fa que una persona recomani o no un hotel. Però per poder fer un model recomanació, el que ens plantegem fer, és un model de regressió per cada hotel, de manera que recomenem o no un hotel en funció de les variables descriptives disponibles en cada hotel. 
+
+
+
+```{r warning=FALSE}
+
 
 #Anem a ferun regressió logistica per hotel i creant el resultat en forma de taula
-llista_hotels=unique(data.hotels_comparables$nomHotel)
-result_roc<-NULL
+llista_hotels=unique(data$nomHotel)
+result_roc<-data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
 list.model.recomanacio<-NULL
 for (cols in llista_hotels)
 {
   
   data.regressio<-data[data$nomHotel==cols,]
   data.regressio$recomanar<-ifelse(data.regressio$notaHotel<data.regressio$notapersona,0,1)
-  
-  try(model.recomanacio<-glm(recomanar~TipusHabitacio+Nits+ProcedenciaComentari+TipusViatge+Acompanyament+Season , data = data.regressio),silent=T)
-  pred<-predict(model.recomanacio,data.regressio,type="response")
-  area<-auc(data.regressio$recomanar, pred)
-  optim_point<-optim.thresh(data.regressio$recomanar,pred)$min.ROC.plot.distance
-  list.model.recomanacio<-list(list.model.recomanacio,c(cols,model.recomanacio))
-
-  if (is.null(result_roc))
+  #Treiem els hotels que no tinguin com a mínim 2 nivells en les categoriques que estem estudiant
+  if ( NROW(levels(as.factor(as.character(data.regressio$TipusHabitacio))))>2 &
+       NROW(levels(as.factor(as.character(data.regressio$TipusViatge))))>2 &
+       NROW(levels(as.factor(as.character(data.regressio$Acompanyament))))>2 &
+      NROW(levels(as.factor(as.character(data.regressio$Season))))>2 )
   {
-    result_roc<-cbind(cols,area,optim_point)
   
-  }
-  else
-  {
-    aux.merge<-cbind(cols,area,optim_point)
-    result_roc<-rbind(result_roc,aux.merge)
-    
-  }
+      model.recomanacio<-glm(recomanar~TipusHabitacio+Nits+TipusViatge+Acompanyament+Season , data = data.regressio)
+      pred<-predict(model.recomanacio,data.regressio,type="response")
+      area<-auc(data.regressio$recomanar, pred)
+      optim_point<-optim.thresh(data.regressio$recomanar,pred)$min.ROC.plot.distance[1]
 
+        aux.merge<-data.frame(cols,area,as.numeric(optim_point),data.regressio$notaHotel[1])
+        result_roc<-rbind(result_roc,aux.merge)
+        aux.list<-list(list("nomhotel"=cols,"model"=model.recomanacio))
+        list.model.recomanacio<-append(list.model.recomanacio,aux.list)
 
+  }
 }
-
-kable(result_roc[,c(1:3)])
-
+colnames(result_roc)<-c("NomHotel","AUC","Optim_point","nota")
+#treiem la taula dels punts òptims on donar el possitius per cada hotel
+kable(head(result_roc[,c(1:4)],10),caption="Punt òptim d'acceptació de possitus per hotel")
 
 ```
+
+**Tenim més o menys precisió en funció de l'hotel, però de cara l'exercici dinàmic farem el model de predicció obviant que hi ha auc, arees molt baixes, per tant no serien uns grans models, en aquest casos. Per avançar en l'exercici, obviem mirar la significància de cadasquna de les variables així com si per cada hotel acabem tenint prou mostra, és a dir, diferents combinacions de descripcions de categòriques. S'hauria de fer per garantir  un bon model però creiem interessant plantejar una primera iteració que quedaria oberta per posteriors refinaments**
+
+
+```{r warning=FALSE}
+
+recomanacio_hotels<-function(entrada, list.model.recomanacio,result_roc)
+{
+  
+  recomanacio<-data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+  roc_actual<-data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+  norecomenats<-data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+  for (i in 1:NROW(list.model.recomanacio))
+  {
+    actual<-list.model.recomanacio[[i]]
+    predict.hotel<-predict(newdata=entrada,actual$model)
+    roc_actual<-result_roc[which(result_roc$NomHotel==actual$nomhotel),]
+    if (round(predict.hotel,2)>=round(roc_actual$Optim_point,2)) 
+      {
+        
+        result_actual<-data.frame(as.character(roc_actual$NomHotel),roc_actual$nota,predict.hotel,roc_actual$Optim_point)
+        colnames(result_actual)<-c("Nom Hotel","Nota","Valor_Prediccio","Valor_Optim")
+        recomanacio<-rbind(recomanacio,result_actual) 
+      }
+    else
+    {
+         result_actual<-data.frame(as.character(roc_actual$NomHotel),roc_actual$nota,predict.hotel,roc_actual$Optim_point)
+        colnames(result_actual)<-c("Nom Hotel","Nota","Valor_Prediccio","Valor_Optim")
+        norecomenats<-rbind(norecomenats,result_actual)   
+        }
+  }
+  
+  recomanacio$diferencia<-recomanacio$Valor_Prediccio-recomanacio$Valor_Optim
+  norecomenats$diferencia<-norecomenats$Valor_Prediccio-norecomenats$Valor_Optim
+  recomanacio<-recomanacio %>% arrange(desc(diferencia,Nota))
+  norecomenats<-norecomenats %>% arrange(desc(diferencia,Nota))
+
+  return(list("recomenats"=recomanacio, "norecomenats"=norecomenats))
+}
+
+entrada<-data.frame("Habitacio Doble",3,"Viajedeocio","Pareja","PRIMER TRIMESTRE")
+#entrada<-data.frame("Habitacio Doble",1,"Viajedeocio","Grupo","SEGON TRIMESTRE")
+
+colnames(entrada)<-c("TipusHabitacio","Nits","TipusViatge","Acompanyament","Season")
+
+hotels.recomanats<-recomanacio_hotels(entrada,list.model.recomanacio,result_roc)
+
+kable(hotels.recomanats$recomenats, caption="Hotels recomenats pel dataframe Entrada")
+kable(hotels.recomanats$norecomenats, caption="Hotels no recomenats pel dataframe Entrada")
+
+```
+
+En el nostre cas recomenariem els hotels que surten al llista de recomenats. Hem endreçat en criteri descendent per la diferència que hi ha entre el valor predit i el valor_optim i després per la nota mitjana de l'hotel.
 
