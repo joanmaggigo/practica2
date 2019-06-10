@@ -1,0 +1,854 @@
+---
+title: 'PRACTICA 2: LIMPIEZA Y VALIDACIÓN DE LOS DATOS'
+author: "Carles Maggi Gómez - Joan A. Maggi Gómez"
+date: '`r format(Sys.Date(),"%e de %B %Y")`'
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+if (!require("knitr")){
+  install.packages("knitr")
+}
+knitr::opts_chunk$set(echo = TRUE)
+Encoding = "UTF-8"
+```
+
+
+
+```{r  Carregem les llibreries si ens calen, include=FALSE}
+if (!require("rmarkdown")){
+  install.packages("rmarkdown")
+}
+
+if (!require("lubridate")){
+  install.packages("lubridate")
+}
+
+if (!require("dplyr")){
+  install.packages("dplyr")
+}
+if (!require("pROC")){
+  install.packages("pROC")
+}
+if (!require("SDMTools")){
+  install.packages("SDMTools")
+}
+
+library(rmarkdown)
+library(lubridate)
+library(dplyr)
+library(pROC)
+library(SDMTools)
+
+options(digits = 2)
+
+```
+
+Partim de tres fitxers de la primera parts de la pràctica que cal unificar en un sol per poder ser tratats.
+L'objectiu es verure si hi ha diferencies de quailitat dels hotels en general i després en particular, segons les puntuacions dels comentaris 
+desl usuaris, entre els  periodes de hivern ('primer trimestre'), i estiu('tercer trimestre'). 
+
+
+```{r, Carrega Dades ,echo=TRUE}
+
+# Lectura del fitxer - read.csv() 
+
+categories <-read.csv("https://raw.githubusercontent.com/joanmaggigo/practica2/master/CSV/CategoriesXComentariBooking.csv",header=F,sep=",",encoding = "UTF-8" ,stringsAsFactors = FALSE)
+comentaris <-read.csv("https://raw.githubusercontent.com/joanmaggigo/practica2/master/CSV/ComentarisXHotelsBarcelonaBooking.csv",header=F,sep=",",encoding = "UTF-8" ,stringsAsFactors = FALSE)
+estancies<-read.csv("https://raw.githubusercontent.com/joanmaggigo/practica2/master/CSV/HotelsBarcelonaBooking.csv",header=F,sep=",",encoding = "UTF-8" ,stringsAsFactors = FALSE)
+```
+Afegim els noms del atributs.
+
+```{r, Carrega Nom Atributs,echo=TRUE}
+
+colnames(estancies)<-c("idHotel","estrelles","nota","nom","link")
+colnames(comentaris)<-c("idHotel","idIteracio","index","nomHotel","nota","comPositiu","comNegatiu","data")
+colnames(categories)<-c("idHotel","idIteracio","index","Categoria")
+
+```
+
+
+# Descripció dels dataset.
+
+Podem trobar el datasets en el següent repositori :
+
+https://github.com/joanmaggigo/practica2/CSV
+
+
+El dataset d'hotels  conté `r nrow(estancies)` registres i  `r ncol(estancies)` variables. 
+El dataset de comentaris conte `r nrow(comentaris)` registres i  `r ncol(comentaris)` variables. 
+El dataset de categories per comentaries conte `r nrow(categories)` registres i  `r ncol(categories)` variables. 
+
+
+Comencem donant un cop d'ull al contingut del fitxers :
+
+```{r, Visualització de categories, echo=TRUE}
+kable(head(categories,10),caption ="Inspecció visual categories")
+```
+
+A tall d'exemple, veiem que el fitxer de categories té valors com ara 'Pareja' o 'Grupo' que entenem que són valors possibles dins la categoria d'acompanyament (o tipus d'acompanyament), així com 'HabitaciónDobleSuperior' o 'HabitaciónDoble-1o2camas', que serien valors de la categoria tipus d'habitació.
+
+Mirem ara el fitxer dels hotels:
+
+
+```{r,  Visualització de estancies, echo=TRUE}
+# head(estancies[(estancies$estrelles==0),"nom"])
+head(estancies,10)
+
+```
+D'altra banda, quan mirem el fitxer d'hotels, veiem que existeixen valors d'estrelles = 0 que mirant el nom de l'hotel veiem que no són hotels, sino que es refereixen a apartaments. Com que nosaltres ens centrarem en els Hotels tindrem que prescindir d'aquests últims.
+
+
+Començarem a abordar el problema, fent el merge dels datasets, i analitzant el tema de les categories nomes amb els hotels tal i com hem dit, no tenint en compte els apartaments ( Estrelles = 0)
+
+Primer ajuntarem en un sol dataset els comentaris i les categories. Aquest dataset estan relacionats pel  "idHotel","idIteracio","index", per tant utilitzarem aquet camps fer fusionar-los.
+```{r, echo=TRUE}
+#A comentaris tenim dues columnes comentari possitiu i comentari negatiu que no farem res
+#de text mining per tant eliminem del procés el comentari possitiu i el conmentari negtiu
+comentaris<-comentaris [,-c(6,7)]
+# Creem un única dataset que fusiona tots els comentaries i categories
+comentaris.cat<-merge(comentaris,categories,by.x=c("idHotel","idIteracio","index"),by.y=c("idHotel","idIteracio","index"))
+
+
+```
+Tot seguit fusionarem el nou contingut de comentaris amb el hotel. En  aquest cas els datsets estan relacionats per "idHotel". Aprofitem per nomes incloure els que són hotels "estrelless <>0", tal com hem dit que fariem abans. Al final mirem com ens queda el fitxer
+
+```{r, echo=TRUE}
+# Fem el merge amb hotels
+hotels.comentaris.cat<-merge(comentaris.cat,estancies, by.x="idHotel", by.y="idHotel")
+hotels<-hotels.comentaris.cat[which(hotels.comentaris.cat$estrelles!=0),]
+kable(head(hotels,10), caption="Hotels Comentaris i Categories")
+```
+```{r, echo=TRUE}
+
+#Veiem, per descripció de dataset que el identificador de la persona/comentari es la concateniació del idhotel, ititeració i index.
+hotels$idPersona <- paste(as.character(hotels$idHotel), as.character(hotels$idIteracio), as.character(hotels$index),sep="_")
+
+#Cada comentari/persona té vinculada n descripcions de categories en el fitxer de categories. Volem veure cuantes descripcions de categories hi ha per cada comentari/persona (i el seu volumen) per poder saber sota quins conceptes s'agrupen les categories.
+categoria_per_comentari <- hotels %>% group_by(idPersona) %>% summarize(total_cat=n())
+comentaris_per_num_categories<-categoria_per_comentari %>% group_by(total_cat) %>% summarize(total_comentaris=n())
+kable(comentaris_per_num_categories, caption="Distribució de total Valors categories per comentaris")
+```
+
+En primer lloc vam pensar en agrupar només en 5 categories, tenint en compte que el comentaris que en tenen 6 eren pocs i ens semblaven irrellevants.Finalment, ens hem adonat que això tenia efectes sobre altres comentaris perquè ens hem trobat que per un mateixa categoria en un comentari hi havia dos valors possibles, pel que el primer procés d'agrupació ha sigut erroni i hem detectat on teniem l'error. L'error  era sobre el valor "AmbMascota" que l'haviem considerat inicialment com tipus de companyia però era un element diferenciat. 
+Per veure-ho clar, fem una selecció dels comentaris que tene 6 descripcions de la categoria i explorem visualment el contingut.
+
+```{r, echo=TRUE}
+
+idpersona_6categories<-unique(categoria_per_comentari[categoria_per_comentari$total_cat==6,"idPersona"])
+kable(head(hotels[(hotels$idPersona %in% idpersona_6categories$idPersona ),][c("idPersona","Categoria")],20))
+
+
+```
+
+Estudiant visualment les descripcions de les categories pensem que podem agrupar en 6 grups. veiem valors que podrien respondre a les categories: Nits,ProcedenciaComentari,Habitació,TipusdeViatge,Acompanyament,ViatjeAmbMascota
+
+
+```{r, echo=TRUE}
+#Estudiem el nombre de comentaris agrupats per categoria per començar a definir els tipus de categoria.
+
+kable(head(hotels %>% group_by(Categoria) %>% summarize(total_cat=n()) %>% arrange(desc(total_cat)),10))
+```
+
+En funció de volum comencem a veure patrons per tal de poder crear l'agrupació de la categoria
+
+## Creació noves varaibles agrupacio_categoria, id_persona 
+
+```{r, echo=TRUE}
+# Inicialitzem agrupacio_catgoria  amb el valor "Acompanyament" i anirem posant els difertns valors segons el contingut de la "Categoria"
+hotels$agrupacio_categoria<-"Acompanyament"
+hotels[grep("stancia",hotels$Categoria),"agrupacio_categoria"]<-"Nits"
+hotels[grep("Enviadopormóvil",hotels$Categoria),"agrupacio_categoria"]<-"ProcedenciaComentari"
+hotels[grep("abitaci",hotels$Categoria),"agrupacio_categoria"]<-"Habitacio"
+hotels[grep("uite",hotels$Categoria),"agrupacio_categoria"]<-"Habitacio"
+hotels[grep("DobleEstándar",hotels$Categoria),"agrupacio_categoria"]<-"Habitacio"
+hotels[grep("Apartamento",hotels$Categoria),"agrupacio_categoria"]<-"Habitacio"
+hotels[grep("Viaje",hotels$Categoria),"agrupacio_categoria"]<-"TipusViatge"
+hotels[grep("mascota",hotels$Categoria),"agrupacio_categoria"]<-"ViajaConMascota"
+
+# Visualització de tots els grups de categrioes.
+
+agrupacio_categoria<-unique(hotels$agrupacio_categoria)
+for (cols in agrupacio_categoria) 
+{
+  aux<-hotels[which(hotels$agrupacio_categoria==cols),]
+  aux2<-aux %>% group_by(Categoria) %>% summarize(total_cat=n())
+  print(kable(head(aux2,5), caption=as.character(cols)))
+}
+
+```
+
+Veiem que en el cas de l'agrupació que ens explica el tipus d'habitació i el nombre de nits és interesant recategoritzar la variable, per què hi ha mases valors possibles i alguns amb pocs representats, pel que guanya força sentit.
+
+```{r, echo=TRUE}
+#Ens guardem el nombre de nits en una variable nova.
+
+hotels$nits<-as.numeric(gsub("\\D", "",hotels$Categoria))
+#nomes guardem les nits si la categoria és Nits, els altres números que surten dels texots (tipus 2 habitacions) no apliquen, per tant, els passem a NA
+hotels[which(hotels$agrupacio_categoria!="Nits"),"nits"]<-NA
+
+
+#Recategoritzem dues agrupacions de categories, en funció dels valors observats. Seran l'agrupació Habitació, y la agrupació Nits
+hotels$ReCategoria<-hotels$Categoria
+
+#A les estancies de mes de 7 dies diem que la nova categoria es mésde7dies
+hotels[which(hotels$agrupacio_categoria=="Nits" & as.numeric(gsub("\\D", "",hotels$Categoria))==1 ) ,"ReCategoria"]<-"Una Nit"
+hotels[which(hotels$agrupacio_categoria=="Nits" & as.numeric(gsub("\\D", "",hotels$Categoria))== 2),"ReCategoria"]<-"Dos nits"
+hotels[which(hotels$agrupacio_categoria=="Nits" & (as.numeric(gsub("\\D", "",hotels$Categoria))> 2) & as.numeric(gsub("\\D", "",hotels$Categoria))< 6 ) ,"ReCategoria"]<-"De 3 a 5 Nits"
+hotels[which(hotels$agrupacio_categoria=="Nits" & (as.numeric(gsub("\\D", "",hotels$Categoria))> 6) & as.numeric(gsub("\\D", "",hotels$Categoria))< 8 ) ,"ReCategoria"]<-"De 6 a 7 Nits"
+hotels[which(hotels$agrupacio_categoria=="Nits" & as.numeric(gsub("\\D", "",hotels$Categoria))>7) ,"ReCategoria"]<-"Mesde7"
+
+
+#En el cas del tipus d'habitació, reagrupem seguint la següent lógica
+hotels[which(hotels$agrupacio_categoria=="Habitacio"),"ReCategoria"]<-"Altres"
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("oble",hotels$Categoria),"ReCategoria"]<-"Habitacio Doble"
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("ndividual",hotels$Categoria),"ReCategoria"]<-"Habitacio Individual"
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("uite",hotels$Categoria),"ReCategoria"]<-"Suite"
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("riple",hotels$Categoria),"ReCategoria"]<-"Habitacio Triple"
+hotels[hotels$agrupacio_categoria=="Habitacio" & grepl("druple",hotels$Categoria),"ReCategoria"]<-"Habitacio quadruple"
+
+hotels.Habitacio<-hotels[hotels$agrupacio_categoria=="Habitacio",]
+hotels.Habitacio$ReCategoria<-as.factor(hotels.Habitacio$ReCategoria)
+
+agrupacio_categoria_habitacion<-unique(hotels.Habitacio$ReCategoria)
+for (cols in agrupacio_categoria_habitacion) 
+{
+print(head(hotels.Habitacio[which(hotels.Habitacio$ReCategoria==cols),] %>% group_by(Categoria) %>% summarize(total_cat=n()),10))
+}
+```
+
+La recategorització sembla raonable respecte els valors observats, per tant ja podem procedir a construir el dataset de partida per evaluar els objectius descrits
+
+## Creació del Dataset de treball
+
+```{r echo=TRUE, warning=FALSE}
+#Anem a crear el Dataset de treball
+
+#Creem un identificador de persona
+categories_per_persona<-hotels %>% group_by(idPersona) %>% summarize(total_cat=n())
+
+#Creem el dataset de treball
+data<-unique(hotels[c("nomHotel","nota.x","data","estrelles","idPersona","nota.y")])
+#data<-merge(data,categories_per_persona,by.x="idPersona",by.y="idPersona")
+
+#Creem un dataset que ajunti el idcomentari amb l'agrupació de categoria
+data.Habitacio<-hotels[hotels$agrupacio_categoria=="Habitacio",]
+data.Habitacio<-data.Habitacio[c("idPersona","ReCategoria")]
+data.Nits<-hotels[hotels$agrupacio_categoria=="Nits",]
+data.Nits<-data.Nits[c("idPersona","ReCategoria","nits")]
+data.ProcedenciaComentari<-hotels[hotels$agrupacio_categoria=="ProcedenciaComentari",]
+data.ProcedenciaComentari<-data.ProcedenciaComentari[c("idPersona","ReCategoria")]
+data.TipusViatge<-hotels[hotels$agrupacio_categoria=="TipusViatge",]
+data.TipusViatge<-data.TipusViatge[c("idPersona","ReCategoria")]
+data.Acompanyament<-hotels[hotels$agrupacio_categoria=="Acompanyament",]
+data.Acompanyament<-data.Acompanyament[c("idPersona","ReCategoria")]
+data.ViajaConMascota<-hotels[hotels$agrupacio_categoria=="ViajaConMascota",]
+data.ViajaConMascota<-data.ViajaConMascota[c("idPersona","ReCategoria")]
+
+#fem els merges per crear el ddataset de treball
+data<-merge(data,data.Habitacio,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.Nits,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.ProcedenciaComentari,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.TipusViatge,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.Acompanyament,by.x="idPersona",by.y="idPersona",all.x = T)
+data<-merge(data,data.ViajaConMascota,by.x="idPersona",by.y="idPersona",all.x = T)
+
+
+colnames(data)<-c("idPersona","nomHotel","notapersona","data","estrelles","notaHotel","TipusHabitacio","DuradaEstancia","Nits","ProcedenciaComentari","TipusViatge","Acompanyament","ViajaConMascota")
+summary(data)
+
+```
+
+
+# Neteja de dades
+## Tipus de dades
+
+Eliminem l'identificador de la persona perquè ja no ens fa falta d'ara endevant.
+```{r}
+data <- select(data, -idPersona)
+```
+
+
+Assignem el tipus de dades correcte, ja que les notes tenen una ',' com a separador decimal i cal posar-hi un punt, i la data l'hem de passar com a tipus data.
+```{r, echo=TRUE}
+
+
+#Veiem que s'ha de passar la nota del hotel a numèric
+data$notaHotel<-as.numeric(gsub(",",".",data$notaHotel))
+#veiem que s'ha de passar les notes de persona  a numeric
+data$notapersona<-as.numeric(gsub(",",".",data$notapersona))
+#Hem de posar la data en format data
+data$data<-as.Date(data$data)
+summary(data)
+
+```
+
+
+```{r}
+
+#Comencem analitzant des de la perspectiva de l'hotel.
+aux.hotels<-unique(data[c("nomHotel","notaHotel","estrelles","notapersona")])
+summary(aux.hotels)
+
+#Pel que fa a les estrelles veiem que té una distribució raonable amb valors, etc.. per tant ho donem per bo
+
+#Les notes mitjes del hotel semblen raonables.
+
+# Anteriorment ja hem eliminat registres que tenien la puntuacio de persona més gran que 3 vegades la desviació estandar, ja que pot ser puntual o molt  subjectiu que hagin tingut una mala experiencia puntual i estiguin resentits,  o be és un error.
+```
+## Tractament dels valors na
+
+```{r}
+
+
+#veiem els NA
+colSums(is.na(data))
+
+
+#Anem a pams, pel cas, ViajaConMascota, sabem que si no está informat, es raonable pensar que no viatge ambMascota. Fem una recategorització per transformar-ho en una binaria, els que tenen valors S els que no en tenen N
+
+data[!(is.na(data$ViajaConMascota)),"ViajaConMascota"]<-"S"
+data[(is.na(data$ViajaConMascota)),"ViajaConMascota"]<-"N"
+
+#Per tipus de viatge, el volum de NA es un 10% aprox, per tant pensem que té prou instancia per si sol com per afegir un valor més dins la categoria que sigui SENSEINFORMAR per veure impactes en la nota (o altres)
+
+data[(is.na(data$TipusViatge)),"TipusViatge"]<-"SenseInformar"
+
+#Procedencia comentari, només té un valor informat, per tant, entenem que l'altre valor és per web
+data[(is.na(data$ProcedenciaComentari)),"ProcedenciaComentari"]<-"EnviadoporWeb"
+
+#A tipusHabitacio I Nits, tenim la sospita que els que estan en NA son els mateixos.
+data[(is.na(data$Nits)) |is.na(data$TipusHabitacio),]
+#Veiem que si per tant, sembla raonable pensar que és un error i que milor obviar la informació (eliminarla)
+data<-data[!(is.na(data$Nits)) & !(is.na(data$TipusHabitacio)),]
+
+# VIsualistació del contingut del nostre dataset
+
+summary(data)
+```
+
+## Eliminacó  si cal de valors  outliers i fringeliers
+****
+Mirarem els valors 0 de les notes mitjana d'hotel i les notes de les persones. Recordem que el valor 0 en les estrelles hem entés que significava que era un apartament i per tant no entra en el nostre estudi, ara mirem les notes mitja dels hotels i la nota de les persones.
+
+
+Eliminem els registres que sobrepassen 3 desviacions estandars  la nota donada per  les persones.Ho fem a nivell d'hotel, i no pas a nivell general, perquè entenem que si un hotel és molt dolent potser tothom el puntua amb 1 o 2, que de segur serien outliers si els considressim en la totalitat de les puntuacions de tots els hotels, pero serien valors força normals a la puntuació própia del hotel.
+
+
+```{r, echo=TRUE}
+dataaux<-data
+noudata <-NULL
+{
+  remove_outliers <- function(x, limit = 3) {
+      mn <- mean(x, na.rm = T)
+      out <- limit * sd(x, na.rm = T)
+      x < (mn - out) | x > (mn + out)
+  }
+  hotels.outliers<-unique(data$nomHotel)
+  
+  for (cols in hotels.outliers){
+     
+    un.hotel<-data[data$nomHotel==cols,]
+    if (NROW(un.hotel)>1) {
+    un.hotel<-un.hotel[remove_outliers(un.hotel$notapersona,3)==FALSE,]
+    }
+  
+    if (is.null(noudata) )
+    {  noudata<-un.hotel}
+    else
+    {
+    noudata<-rbind(noudata,un.hotel)
+    }
+  }
+}
+
+summary(noudata)
+data<-noudata
+
+#ANEm a mirar la distribució del nombre de nits
+boxplot(data$Nits)
+outlier_superior<-IQR(data$Nits)*1.5+quantile(data$Nits)[4]
+#Anem si les estàncies llargues es concentren en uns hotels específics o no.
+kable(head(data %>% filter(Nits>outlier_superior)  %>% group_by(nomHotel) %>% summarize(total_hot=n()),10),caption="Holtes amb duració llarga")
+
+
+```
+
+Sembla que si que hi hagi uns hotels on el nombre de dies és més elevat, però no veiem cap disbarat en el nombre de nits, per tant, considerem que són valors vàlids i que no hem de fer cap tractament.
+
+## Factorització de variables categòriques
+
+```{r}
+
+#Anem a transformar les variables categóriques as.factor
+data$ViajaConMascota<-as.factor(data$ViajaConMascota)
+data$Acompanyament<-as.factor(data$Acompanyament)
+data$TipusViatge<-as.factor(data$TipusViatge)
+data$ProcedenciaComentari<-as.factor(data$ProcedenciaComentari)
+data$DuradaEstancia<-as.factor(data$DuradaEstancia)
+data$TipusHabitacio<-as.factor(data$TipusHabitacio)
+data$estrelles<-as.factor(data$estrelles)
+
+# En el cas de estrelles , els hi donem un ordre, ja que la qualificació és el que indica.
+data$estrelles<-ordered(data$estrelles,levels=c("1","2","3","4","5"))
+data$nomHotel<-as.factor(data$nomHotel)
+summary(data)
+
+#Ens adonem que acompanyament te un factor que es 'Familia con niños mayores' i 'Familia con ninos pequeños', i el grup de 'Familia con niños mayores' es força petit, pel que agrupem els dos nivells a 'Familiaconniños'
+levels(data$Acompanyament) <- c("Familiaconniños","Familiaconniños","Grupo","Grupodeamigos","Pareja","Personaqueviajasola")
+
+```
+
+
+## Mirem les gràfiques quantile-quamtile plot i l'histograma per veure si hi ha variables susceptibles a la normalització 
+
+```{r Normalitat,eval=TRUE,echo=TRUE}
+par(mfrow=c(2,2))
+for(i in 1:ncol(data)) {
+  if (is.numeric(data[,i])){
+    qqnorm(data[,i],main=paste("Normal Q_Q Plot For",colnames(data)[i]))
+    qqline(data[,i],col="blue")
+    hist(data[,i],main=paste("Histograma for ",colnames(data)[i]), xlab=colnames(data)[i],freq=FALSE)
+  }
+}
+par(mfrow=c(1,1))
+```
+
+La visualització dels gràfics no ens mostra normalitat en les dades, però per acabar-ho de concreta, aplicarem els test (no ho fem sobre notaHotel perquè pensem que no es pot estudiar en aquest dataset)
+Per acabar de comprobar, anem aplicar el test de Shapiro
+
+```{r}
+set.seed(1000)
+shapiro.test(sample(data$notapersona,5000))
+shapiro.test(sample(data$Nits,5000))
+```
+
+Amb ambdos casos rebutjem la hipotésis nul·la i per tant no podem assumir normalitat, tal ic om haviem vist amb les gràfiques.
+
+## Nous atributs
+
+Ens decidim ara a fer les primeres hipotesis, i la primera és que volem saber si les notes que es donen en el primer trimestre de l'any son diferents a les que es donen a l'estiu
+
+Per això, caldrà, que afegim una variable nova, que determini l'epoca de l'any en funció de la data del comentari (pot haver-hi un decalatge de dies, però assumin que els comentaris es fan aprop de la data en la que s'ha gaudit l'estancia de l'hotel)
+```{r}
+
+data$Season<-"PRIMER TRIMESTRE"
+data[month(data$data)>=4 & month(data$data)<=6,"Season" ]<-"SEGON TRIMESTRE"
+data[month(data$data)>=7 & month(data$data)<=9,"Season" ]<-"TERCER TRIMESTRE"
+data[month(data$data)>=10 & month(data$data)<=12,"Season" ]<-"QUART TRIMESTRE"
+data$Season<-as.factor(data$Season)
+summary(data)
+
+```
+
+Anem a veure si la diferencia en general de les notes de les persones pels hotels difereix entre el primer trimestre i el tercer trimetre. Per això,estudiarem la normalitat i la homocestadicitat de la nota. En un primer moment pel conjunt de la mostra i poc a poc anirem diferentciant pel conjunt de categoritzacions que aporten les dades
+
+
+Amb tot això ja sabem que la nota persona no segueixen una distribució normal ni hi ha homocedasticitat entre els grups separats per season. Per tant, com que no es compleix, el que farem es aplicar un test parametric Mann-Whitney
+
+```{r echo=TRUE}
+fligner.test(notapersona ~ Season, data = data)
+#No hi hahomocedasticitat aplqieum una prova no paramètica (wolcox.test)
+wilcox.test(notapersona ~ Season, data = data, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+
+#Creem un dataset per treure resultats resumits
+hotels_1er_3er<-data[which(data$Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE")),]
+#Visualitzem mitjanes
+kable(hotels_1er_3er%>% group_by(Season) %>% summarise(n=n(),mean=mean(notapersona),sd=sd(notapersona)))
+
+```
+
+Existeix una forta evidència de diferència de les mitjanes de les notes entre el primer trimestre i el tercer. Sembla ser que cap a l'estiu la qualitat es percebuda pitjor que a l'hivern. Això vol dir o que els clients són més exigents o el personal té menys qualitat. Volem estudiar ara si això es igual per conjunt de categoriques.  Començarem per diferencies en funció de les estrelles.
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#Anem a iterar hotel per hotel per determinar quin test realitzar i veure si hi ha diferències dignificatives.
+resultat.estrelles <- data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+llistat_estrelles<-levels(data$estrelles)
+for(cols in llistat_estrelles)
+{
+  aux<-data[which(data$estrelles==cols),]
+  
+  sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
+  homo<-  fligner.test(notapersona ~ Season, data = aux)
+
+  test<-"No Parametric"
+  if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
+    {
+      #tenim homocedasticitat
+        test<-"Student"
+    }
+    
+  if (test=='No Parametric') 
+  {
+      test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+  else
+  {
+    test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]), NROW(aux))
+  colnames(actual)<-c("Estrelles","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre","Nombre Comentaris")
+  #Construim la taula de resultats
+  resultat.estrelles<-rbind(resultat.estrelles,actual)
+  
+}
+
+kable(resultat.estrelles,caption="Resum notes per estrelles")
+```
+
+Veient els resultat, veiem que en el cas de les estrelles, són els de cinc que no hi ha diferències entre les notes mitjanes pero si entre els de 1 a 4 estrelles.
+
+Ara volem comprovar per tipus d'habitació
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#Per tipus de habitació
+
+resultat<- data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+
+llistat<-levels(data$TipusHabitacio)
+for(cols in llistat)
+{
+  aux<-data[which(data$TipusHabitacio==cols),]
+  
+  sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
+  homo<-  fligner.test(notapersona ~ Season, data = aux)
+
+  test<-"No Parametric"
+  if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
+    {
+      #tenim homocedasticitat
+        test<-"Student"
+    }
+    
+  if (test=='No Parametric') 
+  {
+      test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+  else
+  {
+    test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]), NROW(aux))
+  colnames(actual)<-c("Tipus Habitacio","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre", "Nombre Comentaris")
+  #Construim la taula de resultats
+  resultat<-rbind(resultat,actual)
+  
+}
+
+kable(resultat, caption="REsum per Tipus Habitació")
+```
+
+En el cas de tipus d'habitació, només veiem diferencia en els que han demanat una habitació quadruple i habitació doble.
+
+Anem a estudiar per tipus de viatge
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#Per DuradaEstancia
+
+resultat<- data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+
+llistat<-levels(data$DuradaEstancia)
+for(cols in llistat)
+{
+  aux<-data[which(data$DuradaEstancia==cols),]
+  
+  sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
+  homo<-  fligner.test(notapersona ~ Season, data = aux)
+
+  test<-"No Parametric"
+  if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
+    {
+      #tenim homocedasticitat
+        test<-"Student"
+    }
+    
+  if (test=='No Parametric') 
+  {
+      test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+  else
+  {
+    test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]),NROW(aux))
+  colnames(actual)<-c("Durada Estancia","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre","Nombre Comentaris")
+  #Construim la taula de resultats
+  resultat<-rbind(resultat,actual)
+  
+}
+
+kable(resultat, caption="Resum per durada Estancia")
+```
+
+En aquest cas veiem que com més llarga és l'estancia menys diferencia hi ha entre les notes d'estiu i d'hivern. A partir de 6 nits no hi ha evidència de diferencia de nota entre estiu i hivern.
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#Per Acompanyament
+
+resultat<- data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+
+llistat<-levels(data$Acompanyament)
+for(cols in llistat)
+{
+  aux<-data[which(data$Acompanyament==cols),]
+  
+  sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
+  homo<-  fligner.test(notapersona ~ Season, data = aux)
+
+  test<-"No Parametric"
+  if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
+    {
+      #tenim homocedasticitat
+        test<-"Student"
+    }
+    
+  if (test=='No Parametric') 
+  {
+      test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+  else
+  {
+    test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]), NROW(aux))
+  colnames(actual)<-c("Acompanyament","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre","Nombre Comentaris")
+  #Construim la taula de resultats
+  resultat<-rbind(resultat,actual)
+  
+}
+
+kable(resultat, caption="Resum per Acompanyament")
+```
+
+Només els que viatgem amb amics sembla que no percebin una diferencia entre la nota que posen a l'estiu i a l'hivern.
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+#Per TipusViatge
+
+resultat<- data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+
+llistat<-levels(data$TipusViatge)
+for(cols in llistat)
+{
+  aux<-data[which(data$TipusViatge==cols),]
+  
+  sha<-shapiro.test(sample(aux$notapersona,min(nrow(aux),5000)))
+  homo<-  fligner.test(notapersona ~ Season, data = aux)
+
+  test<-"No Parametric"
+  if ((sha$p.value>=0.05) & (homo$p.value>=0.05))
+    {
+      #tenim homocedasticitat
+        test<-"Student"
+    }
+    
+  if (test=='No Parametric') 
+  {
+      test.comparacio<-wilcox.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+  else
+  {
+    test.comparacio<-t.test(notapersona ~ Season, data = aux, subset = Season %in% c("PRIMER TRIMESTRE", "TERCER TRIMESTRE"))
+  }
+  actual<-data.frame(cols,sha$p.value,homo$p.value,test,test.comparacio$p.value,mean(aux[which(aux$Season=="PRIMER TRIMESTRE"),"notapersona"]),mean(aux[which(aux$Season=="TERCER TRIMESTRE"),"notapersona"]), NROW(aux))
+  colnames(actual)<-c("TipusViatge","Shapiro","Fligner","Test Aplicat","Comparacio","Mitjana Primer Trimestre","Mitjana Tercer Trimestre","Nombre Comentaris")
+  #Construim la taula de resultats
+  resultat<-rbind(resultat,actual)
+  
+}
+
+kable(resultat, caption="Resum per TipusViatge")
+
+```
+
+Per tipus de viatge, es percep que hi ha diferencia entre la nota que es posa a l'estiu respecte la nota que es posa a l'hiven.
+
+Ara, ens proposem crear un algoritme que ens digui en funció de les categoriques quin és el millor hotel per nosaltres. Ens plantejem fer el següent.
+Crearem una regressió lineal per predicció de nota per cada hotel. Comprovarem el grau de significancia de la regressió. Un cop fet això, si veiem que podem prossegguir, aplicarem la regressió per cada hotel i obtindrem la llista d'hotels ordenat per nota ascendent, per donar-te la confiança i el grau de confiança de la recomenació (1-p_value de la regressió)
+
+
+```{r}
+
+model.hotel.nota<-lm(notapersona~TipusHabitacio+Nits+TipusViatge+Acompanyament+Season, data)
+summary(model.hotel.nota)
+
+
+```
+En termes generals la nota no es pot explicar a través d'aquestes dades perqué el valor d'R^2 é smolt baix, pel que no som capaços d'explicar tota la variabilitat, és a dir, ens falten informació (regressors) que ajudin a predir el comportament.
+
+Anem a plantejar una altra estrategia, en aquest cas determinem que una persona recomana un hotel X si la nota que ha posat (notapersona) és superior a la nota mitjana de l'hotel (notaHOtel), per fer això, crearem una variable binària (Recomana amb valors S/N i mirarem de treballar amb una regressió logística). Mirarem de recomenar un hotel en funció de les variables explicatives.
+
+```{r}
+#Creem la nova variable
+data$recomanar<-ifelse(data$notaHotel<data$notapersona,0,1)
+#Validem que hi hagi sempre més d'un cas
+hotel.excloure<-data %>% group_by(nomHotel,recomanar) %>% group_by(nomHotel) %>% summarise(n=n_distinct(recomanar)) %>% filter(n<2)
+
+#excloem els que no tenen més d'un cas
+data<-data[which(!(data$nomHotel %in%  hotel.excloure$nomHotel)),]
+
+#Mirem en termes generals els resultats de recomanació sense entrar hotel per hotel
+model.recomanacio<-glm(recomanar~TipusHabitacio+Nits+TipusViatge+Acompanyament+Season , data = data)
+summary(model.recomanacio)
+pred<-predict(model.recomanacio,data,type="response")
+corba<-roc(data$recomanar,pred)
+plot(corba,print.thres="best", print.thres.best.method="closest.topleft", main=" Corvesa ROC. - Llindar óptim")
+area<-auc(data$recomanar, pred)
+optim_point<-optim.thresh(data$recomanar,pred)$min.ROC.plot.distance[1]
+
+
+# Creo vector amb les predccions segons el llibdar demanat.
+prediccions <- ifelse(test = model.recomanacio$fitted.values >= optim_point, 
+                      yes = 1, no = 0)
+#Creem la matriu de confusió
+matriu_confusio<- addmargins(table(data$recomanar, prediccions,
+                                   dnn = c("observacions", "prediccions")))
+
+#Matriu de confusio
+matriu_confusio
+
+```
+
+El model es força dolent, el punt òptim seria determinar 0.422 com a valor a partir del qual acceptem els possius. La matriu de confusions ens dona un % d'encert molt dolent.
+Assumint un valor de  confiança 0.05 només són significatives, el tipus d'habitació individu, la quadruple i la suite.
+Pel tipus de viatge el de negocis. Acompanyament no és significatiu i el segon i el tercer Trimestre són significatius.
+
+Assumint el que hem dit, el model ens diu que per recomanar o no un hotel comencem per una puntuació de 0.37. Tots els tipus d'habitació resten a excepció de l'habitació Individual i Altres. Les nits, resten 0.001 per cada nit. Els que viatge per negocis puntuene millor pels que els d'oci resten. Per grups resta la nota quan qui viatge es un grup d'amics i tant acompanyament com Quart Segon Tercer trimestre sumen a la nota.
+
+Això, és un exercici per ajudar a entedre que fa que una persona recomani o no un hotel. Però per poder fer un model recomanació, el que ens plantegem fer, és un model de regressió per cada hotel, de manera que recomenem o no un hotel en funció de les variables descriptives disponibles en cada hotel. 
+
+
+
+```{r warning=FALSE}
+
+
+#Anem a ferun regressió logistica per hotel i creant el resultat en forma de taula
+llista_hotels=unique(data$nomHotel)
+result_roc<-data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+list.model.recomanacio<-NULL
+for (cols in llista_hotels)
+{
+  
+  data.regressio<-data[data$nomHotel==cols,]
+  data.regressio$recomanar<-ifelse(data.regressio$notaHotel<data.regressio$notapersona,0,1)
+  #Treiem els hotels que no tinguin com a mínim 2 nivells en les categoriques que estem estudiant
+  if ( NROW(levels(as.factor(as.character(data.regressio$TipusHabitacio))))>2 &
+       NROW(levels(as.factor(as.character(data.regressio$TipusViatge))))>2 &
+       NROW(levels(as.factor(as.character(data.regressio$Acompanyament))))>2 &
+      NROW(levels(as.factor(as.character(data.regressio$Season))))>2 )
+  {
+  
+      model.recomanacio<-glm(recomanar~TipusHabitacio+Nits+TipusViatge+Acompanyament+Season , data = data.regressio)
+      pred<-predict(model.recomanacio,data.regressio,type="response")
+      area<-auc(data.regressio$recomanar, pred)
+      optim_point<-optim.thresh(data.regressio$recomanar,pred)$min.ROC.plot.distance[1]
+
+        aux.merge<-data.frame(cols,area,as.numeric(optim_point),data.regressio$notaHotel[1])
+        result_roc<-rbind(result_roc,aux.merge)
+        aux.list<-list(list("nomhotel"=cols,"model"=model.recomanacio))
+        list.model.recomanacio<-append(list.model.recomanacio,aux.list)
+
+  }
+}
+colnames(result_roc)<-c("NomHotel","AUC","Optim_point","nota")
+#treiem la taula dels punts òptims on donar el possitius per cada hotel
+kable(head(result_roc[,c(1:4)],10),caption="Punt òptim d'acceptació de possitus per hotel")
+
+```
+
+**Tenim més o menys precisió en funció de l'hotel, però de cara l'exercici dinàmic farem el model de predicció obviant que hi ha auc, arees molt baixes, per tant no serien uns grans models, en aquest casos. Per avançar en l'exercici, obviem mirar la significància de cadasquna de les variables així com si per cada hotel acabem tenint prou mostra, és a dir, diferents combinacions de descripcions de categòriques. S'hauria de fer per garantir  un bon model però creiem interessant plantejar una primera iteració que quedaria oberta per posteriors refinaments**
+
+
+```{r warning=FALSE}
+
+recomanacio_hotels<-function(entrada, list.model.recomanacio,result_roc)
+{
+  
+  recomanacio<-data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+  roc_actual<-data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+  norecomenats<-data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+  for (i in 1:NROW(list.model.recomanacio))
+  {
+    actual<-list.model.recomanacio[[i]]
+    predict.hotel<-predict(newdata=entrada,actual$model)
+    roc_actual<-result_roc[which(result_roc$NomHotel==actual$nomhotel),]
+    if (predict.hotel>=(roc_actual$Optim_point)) 
+      {
+        result_actual<-cbind(as.character(roc_actual$NomHotel),roc_actual$nota,predict.hotel,roc_actual$Optim_point)
+        colnames(result_actual)<-c("Nom Hotel","Nota","Valor Prediccio","Valor Optim")
+        recomacio<-rbind(recomanacio,result_actual) 
+      }
+    else
+    {
+         result_actual<-cbind(as.character(roc_actual$NomHotel),roc_actual$nota,predict.hotel,roc_actual$Optim_point)
+        colnames(result_actual)<-c("Nom Hotel","Nota","Valor Prediccio","Valor Optim")
+        norecomenats<-rbind(norecomenats,result_actual)   
+        }
+  }
+  return(list("recomenats"=recomacio, "norecomenats"=norecomenats))
+}
+
+#entrada<-data.frame("Habitacio Doble",3,"Viajedeocio","Pareja","PRIMER TRIMESTRE")
+entrada<-data.frame("Habitacio Doble",4,"Viajedeocio","Grupo","TERCER TRIMESTRE")
+
+colnames(entrada)<-c("TipusHabitacio","Nits","TipusViatge","Acompanyament","Season")
+
+hotels.recomanats<-recomanacio_hotels(entrada,list.model.recomanacio,result_roc)
+
+
+```
+
