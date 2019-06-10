@@ -68,3 +68,9 @@ Després d'arrengar els fitxers, es crea el dataset següent  amb el que es come
  **Acompanyament       :** Factor w/ 5 levels. Tipus Acompanyament   
  **ViajaConMascota     :** Factor w/ 2 levels. Si viatge amb mascota  
  **Season              :** Factor w/ 4 levels. Temporada del Viatge  
+ 
+ ## Entregables
+ 
+ ** El codi en RDM és a  [Neteja.Rmd](https://github.com/joanmaggigo/practica2/blob/master/Neteja.Rmd)
+ ** El fitxer docx del codi RDM és a [Neteja.docx](https://github.com/joanmaggigo/practica2/blob/master/Neteja.docx)
+ ** El Document entregable és a [Carles Maggi - Joan Maggi - Practica 2] (https://github.com/joanmaggigo/practica2/blob/master/Entregable/Carles%20Maggi%20-%20Joan%20Maggi%20-%20Practica%202.docx)
