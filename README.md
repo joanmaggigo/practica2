@@ -51,7 +51,7 @@ Partim dels tres fitxers de la primera part de la pràctica . La seva descripci�
 **Index :** Int Segon part d'identificació de comentari (número de comentari dins la iteració)   
 **Categoria :** Text Categoria amb la que s'ha categoritzat el comentari  
 
-##Dataset de Treball
+## Dataset de Treball
 
 Després d'arrengar els fitxers, es crea el dataset següent  amb el que es comença a treballar.  
 
