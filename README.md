@@ -15,16 +15,16 @@ Version 1.1.463
 ## SO
 Windows 10 64 Bits
 
-## Objectiu i Descipció dels fitxers :
+## Objectiu i Descripció dels fitxers :
 
-A partir de l'scraping fet a booking per obtenir dades sobre els hotes i opinions del clients, i despres de la generació de 3 datasets, crearem un sol dataset per treure infomració dels hotels .  
+A partir de l'scraping fet a booking per obtenir dades sobre els hotels i opinions del clients, i després de la generació de 3 datasets, crearem un sol dataset per treure informació dels hotels .  
 Entre altres :  
 - Diferencia de qualitat del servei entre estiu i hivern
 - Recomanar hotel segons , Nits de estada, Temporada, Grup, etc...
  
-## Fitxers de PArtida
+## Fitxers de Partida
 
-PArtim dels tres fitxers de la primera parts de la practica . La seva descripció és la següent :
+Partim dels tres fitxers de la primera part de la pràctica . La seva descripció és la següent :
 ### HotelsBarcelonaBooking :
 
 **IdHotel :** BigInt que identifica de manera unívoca el hotel  
@@ -51,17 +51,19 @@ PArtim dels tres fitxers de la primera parts de la practica . La seva descripci�
 **Index :** Int Segon part d'identificació de comentari (número de comentari dins la iteració)   
 **Categoria :** Text Categoria amb la que s'ha categoritzat el comentari  
 
+##Dataset de Treball
+
 Després d'arrengar els fitxers, es crea el dataset següent  amb el que es comença a treballar.  
 
  **nomHotel            :** Factor w/ 82 levels. Nom de L'hotel     
- **notapersona         :** num . Nota donada per la pesona al Hotel    
+ **notapersona         :** num . Nota donada per la persona al Hotel    
  **data                :** Date, format. Data del comentari    
  **estrelles           :** Ord.factor w/ 5 levels. Estrelles del Hotel  
  **notaHotel           :** num. Nota otorgada al hotel per Booking  
  **TipusHabitacio      :** Factor w/ 6 levels. Tipus d'habitació  
- **DuradaEstancia      :** Factor w/ 6 levels. Tipus d'estancia   
- **Nits                :** num. Nits d'estancia    
- **ProcedenciaComentari:** Factor w/ 2 levels. Procedencia del comentari  
+ **DuradaEstancia      :** Factor w/ 6 levels. Tipus d'estància   
+ **Nits                :** num. Nits d'estància    
+ **ProcedenciaComentari:** Factor w/ 2 levels. Procedència del comentari  
  **TipusViatge         :** Factor w/ 3 levels. Tipus de Viatge   
  **Acompanyament       :** Factor w/ 5 levels. Tipus Acompanyament   
  **ViajaConMascota     :** Factor w/ 2 levels. Si viatge amb mascota  
