@@ -855,6 +855,8 @@ hotels.recomanats<-recomanacio_hotels(entrada,list.model.recomanacio,result_roc)
 kable(hotels.recomanats$recomenats, caption="Hotels recomenats pel dataframe Entrada")
 kable(hotels.recomanats$norecomenats, caption="Hotels no recomenats pel dataframe Entrada")
 
+
+write.csv2(data,"c:/Users/Carles Maggi/data_netejada.csv")
 ```
 
 En el nostre cas recomenariem els hotels que surten al llista de recomenats. Hem endreçat en criteri descendent per la diferència que hi ha entre el valor predit i el valor_optim i després per la nota mitjana de l'hotel.
